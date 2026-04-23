@@ -12,8 +12,21 @@ def run(project_dir: str, config: dict, log_cb=None):
     with open(style_file) as f: style = json.load(f)
     base_seed = style.get("seed", 42)
     
-    # RAM Check
+    # Dynamic RAM Check & Wait
+    import time
+    import psutil
+    
     avail = orchestrator.get_available_ram_gb()
+    if avail < 4.0:
+        if log_cb: log_cb(f"Low RAM detected ({avail:.2f}GB). Waiting for OS to reclaim memory...")
+        for _ in range(5):
+            time.sleep(1)
+            avail = orchestrator.get_available_ram_gb()
+            if avail >= 4.0:
+                break
+        if avail < 4.0:
+            if log_cb: log_cb(f"RAM still low after waiting ({avail:.2f}GB). Proceeding anyway...")
+            
     preview = config.get("pipeline", {}).get("preview_mode", False)
     
     if preview or avail < 8.0:

@@ -41,3 +41,19 @@ def generate_text(prompt: str, config: dict) -> str:
             return response_data["choices"][0]["message"]["content"]
     except Exception as e:
         raise RuntimeError(f"LM Studio backend error: {e}")
+
+def eject_model(config: dict):
+    host = config.get("host", "http://localhost:1234")
+    model = config.get("model", "local-model")
+    try:
+        # Send POST to unload model
+        req = urllib.request.Request(
+            f"{host}/v1/models/unload", 
+            data=json.dumps({"model": model}).encode(),
+            headers={"Content-Type": "application/json"}
+        )
+        with urllib.request.urlopen(req, timeout=5) as r:
+            pass
+    except Exception as e:
+        print(f"Failed to eject model from LM Studio: {e}")
+

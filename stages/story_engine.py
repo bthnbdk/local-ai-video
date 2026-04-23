@@ -2,7 +2,7 @@ import os
 import json
 from core.json_parser import parse_llm_json
 from core.schemas import ScriptJSON
-from backends.llm.lmstudio_backend import generate_text as lmstudio_gen
+from backends.llm.lmstudio_backend import generate_text as lmstudio_gen, eject_model as lmstudio_eject
 from backends.llm.ollama_backend import generate_text as ollama_gen
 
 STRICT_PROMPT = """You MUST return valid JSON only.
@@ -62,6 +62,13 @@ def run(project_dir: str, config: dict, log_cb=None):
     out_path = os.path.join(project_dir, "script.json")
     with open(out_path, "w") as f:
         f.write(script_obj.model_dump_json(indent=2))
+        
+    if config.get("llm", {}).get("backend", "lmstudio") == "lmstudio":
+        try:
+            if log_cb: log_cb("Ejecting LM Studio model to free RAM...")
+            lmstudio_eject(config.get("llm", {}))
+        except Exception as e:
+            if log_cb: log_cb(f"Warning: Failed to eject model: {e}")
         
     if log_cb: log_cb(f"Story engine finished. Output saved to {out_path}.")
     return True
