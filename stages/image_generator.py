@@ -11,8 +11,31 @@ def run(project_dir: str, config: dict, log_cb=None):
     
     with open(style_file) as f: style = json.load(f)
     base_seed = style.get("seed", 42)
+    preview = config.get("pipeline", {}).get("preview_mode", False)
     
-    # Dynamic RAM Check & Wait
+    img_backend = config.get("image", {}).get("backend", "auto")
+    
+    if img_backend == "imagerouter":
+        if log_cb: log_cb("Using Cloud API (ImageRouter) for images. Bypassing local VRAM checks.")
+        from backends.image.imagerouter_backend import generate_images_batch
+        
+        # Collect prompts
+        if not os.path.exists(prompts_dir):
+            raise FileNotFoundError("Missing prompts directory")
+            
+        prompts = []
+        for p_file in sorted(os.listdir(prompts_dir)):
+            if not p_file.endswith(".json"): continue
+            with open(os.path.join(prompts_dir, p_file)) as f:
+                prompts.append(json.load(f))
+                
+        # Generate via cloud
+        success = generate_images_batch(prompts, config, img_dir, log_cb)
+        if success and log_cb:
+            log_cb("Cloud image generation complete.")
+        return success
+    
+    # Dynamic RAM Check & Wait (Local)
     import time
     import psutil
     
@@ -27,8 +50,6 @@ def run(project_dir: str, config: dict, log_cb=None):
         if avail < 4.0:
             if log_cb: log_cb(f"RAM still low after waiting ({avail:.2f}GB). Proceeding anyway...")
             
-    preview = config.get("pipeline", {}).get("preview_mode", False)
-    
     if preview or avail < 8.0:
         if log_cb: log_cb("Using SD1.5/Fallback backend mode.")
         req_ram = 4.0

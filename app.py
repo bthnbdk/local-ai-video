@@ -1,7 +1,10 @@
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
 from flask import Flask, render_template, request, Response, stream_with_context, jsonify
 import queue
 import json
-import os
 import threading
 from core.pipeline_runner import PipelineRunner
 from core.state_manager import StateManager
@@ -42,13 +45,19 @@ def create_project():
         else:
             llm_config = {"backend": "lmstudio", "model": "local-model", "host": "http://localhost:1234"}
             
+        img_source = data.get("image_source", "local")
+        if img_source == "cloud":
+            image_config = {"backend": "imagerouter", "model": data.get("image_model", "flux/2-klein")}
+        else:
+            image_config = {"backend": "auto"}
+            
         config = {
             "project_name": project_id,
             "topic": data.get("topic"),
             "style": {"mode": "library", "name": data.get("style", "cinematic_dark"), "freetext": ""},
             "llm": llm_config,
             "tts": {"backend": "kokoro"},
-            "image": {"backend": "auto"},
+            "image": image_config,
             "pipeline": {
                 "preview_mode": data.get("preview_mode") == "on",
                 "music_genre": data.get("music_genre", ""),
