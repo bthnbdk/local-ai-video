@@ -50,6 +50,16 @@ def create_project():
         
     return render_template("create.html")
 
+import shutil
+
+@app.route("/project/<project_id>/delete", methods=["POST"])
+def delete_project(project_id):
+    path = os.path.join("projects", project_id)
+    if os.path.exists(path):
+        import shutil
+        shutil.rmtree(path)
+    return jsonify({"success": True, "redirect": "/"})
+
 @app.route("/project/<project_id>/progress")
 def progress(project_id):
     sm = StateManager(project_id)

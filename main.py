@@ -39,6 +39,16 @@ def run_project(args):
     else:
         runner.run_all()
 
+def delete_project(args):
+    project_id = args.project
+    path = os.path.join("projects", project_id)
+    if os.path.exists(path):
+        import shutil
+        shutil.rmtree(path)
+        print(f"Project '{project_id}' deleted successfully.")
+    else:
+        print(f"Project '{project_id}' not found.")
+
 def main():
     parser = argparse.ArgumentParser(description="Local AI Video Generator CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -57,6 +67,9 @@ def main():
     status_parser = subparsers.add_parser("status", help="Get project status")
     status_parser.add_argument("--project", required=True, help="Project ID")
     
+    delete_parser = subparsers.add_parser("delete", help="Delete a project entirely")
+    delete_parser.add_argument("--project", required=True, help="Project ID to delete")
+    
     args = parser.parse_args()
     
     if args.command == "create":
@@ -74,6 +87,8 @@ def main():
     elif args.command == "status":
         sm = StateManager(args.project)
         print(json.dumps(sm.state["stages"], indent=2))
+    elif args.command == "delete":
+        delete_project(args)
 
 if __name__ == "__main__":
     main()

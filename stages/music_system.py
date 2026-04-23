@@ -151,16 +151,13 @@ def run(project_dir: str, config: dict, log_cb=None):
 
         # 3. STRICT MEMORY HYGIENE
         music_model_instance = None
-        try:
-            from audiocraft.models import MusicGen
-            def load_musicgen():
-                nonlocal music_model_instance
-                music_model_instance = MusicGen.get_pretrained('small')
-                
-            orchestrator.load_model("audiocraft_musicgen", load_musicgen, required_ram_gb=2.0)
-        except ImportError:
-            if log_cb: log_cb("audiocraft missing. Simulating dynamic emotional music.", "warn")
-
+        from audiocraft.models import MusicGen
+        def load_musicgen():
+            nonlocal music_model_instance
+            music_model_instance = MusicGen.get_pretrained('small')
+            
+        orchestrator.load_model("audiocraft_musicgen", load_musicgen, required_ram_gb=2.0)
+        
         block_audios = []
         
         # 2. EMOTION TRANSLATION + GLOBAL GENRE
@@ -172,18 +169,10 @@ def run(project_dir: str, config: dict, log_cb=None):
             duration = block["duration"]
             if log_cb: log_cb(f"Gen Block {idx+1}/{len(mood_blocks)}: {prompt[:50]}..., {duration:.1f}s")
             
-            if music_model_instance is not None:
-                music_model_instance.set_generation_params(duration=duration)
-                wav = music_model_instance.generate([prompt])
-                audio_data = wav[0].cpu().numpy()[0] # [1, c, t] -> Mono flattened array
-                block_audios.append(audio_data)
-            else:
-                # Simulate distinctive tonal emotional blocks with varying harmonics
-                t = np.linspace(0, duration, int(sample_rate * duration), False)
-                base_freq = 200 + (len(block["emotion"]) * 10) + (idx * 20)
-                noise = np.random.randn(len(t)) * 0.02
-                audio_data = np.sin(2 * np.pi * base_freq * t) * 0.1 + noise
-                block_audios.append(audio_data)
+            music_model_instance.set_generation_params(duration=duration)
+            wav = music_model_instance.generate([prompt])
+            audio_data = wav[0].cpu().numpy()[0] # [1, c, t] -> Mono flattened array
+            block_audios.append(audio_data)
 
         # STRICT MEMORY HYGIENE
         if music_model_instance is not None:

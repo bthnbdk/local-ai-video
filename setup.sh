@@ -47,7 +47,7 @@ pip install mflux
 pip install whisper-timestamped
 
 # 10. Utilities
-pip install rembg basicsr realesrgan timm diffusers transformers accelerate
+pip install audiocraft rembg basicsr realesrgan timm diffusers transformers accelerate
 
 echo ""
 echo "=== Setup complete ==="
