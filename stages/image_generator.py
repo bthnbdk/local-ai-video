@@ -1,6 +1,6 @@
 import os
 import json
-from backends.image.flux_backend import generate_image as flux_gen
+from backends.image import flux_backend
 from core.memory_orchestrator import orchestrator
 
 def run(project_dir: str, config: dict, log_cb=None):
@@ -17,13 +17,19 @@ def run(project_dir: str, config: dict, log_cb=None):
     preview = config.get("pipeline", {}).get("preview_mode", False)
     
     if preview or avail < 8.0:
-        if log_cb: log_cb("Using SD1.5 backend fallback.")
+        if log_cb: log_cb("Using SD1.5/Fallback backend mode.")
         req_ram = 4.0
     else:
-        if log_cb: log_cb("Using FLUX/SDXL backend.")
+        if log_cb: log_cb("Using FLUX backend (mflux).")
         req_ram = 8.0
         
-    orchestrator.load_model("image_gen", lambda: None, required_ram_gb=req_ram)
+    # Strictly unload any heavyweight models like LLMs or TTS before Flux init
+    orchestrator.unload_model()
+    
+    def load_flux():
+        flux_backend.init_model(log_cb)
+        
+    orchestrator.load_model("image_gen", load_flux, required_ram_gb=req_ram)
     
     if not os.path.exists(prompts_dir):
         raise FileNotFoundError("Missing prompts directory")
@@ -39,7 +45,12 @@ def run(project_dir: str, config: dict, log_cb=None):
         if log_cb: log_cb(f"Generating image for scene {sid}...")
         
         # Generation call
-        flux_gen(p_data["prompt"], p_data["negative_prompt"], base_seed + sid, out_img, preview)
+        flux_backend.generate_image(p_data["prompt"], p_data.get("negative_prompt", ""), base_seed + sid, out_img, preview)
         
-    if log_cb: log_cb("Image generation complete.")
+    if log_cb: log_cb("Image generation complete. Purging Flux objects and VRAM...")
+    
+    # VRAM STRICT HYGIENE (Delete pointers + mlx.metal.clear_cache)
+    flux_backend.cleanup()
+    orchestrator.unload_model()
+    
     return True

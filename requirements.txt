@@ -1,5 +1,5 @@
 Flask==3.0.2
-Flask-SSE==1.0.3
+Flask-SSE==1.0.0
 pydantic==2.6.2
 psutil==5.9.8
 rapidfuzz==3.6.1
@@ -16,7 +16,7 @@ torchvision==0.17.1
 torchaudio==2.2.1
 
 # Optional/Platform specific (handled by setup.sh or user)
-# mlx-flux  # macOS M-series
+# mflux  # macOS M-series
 # kokoro-onnx
 # diffusers
 # transformers

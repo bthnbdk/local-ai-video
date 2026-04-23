@@ -35,8 +35,8 @@ curl -L -o models/midas/midas_v21_small_256.pt \
 # 7. Kokoro TTS (ARM native ONNX)
 pip install kokoro-onnx
 
-# 8. mlx-flux (FLUX on Apple Silicon via MLX)
-pip install mlx-flux
+# 8. mflux (FLUX on Apple Silicon via MLX)
+pip install mflux
 
 # 9. Whisper Timestamped
 pip install whisper-timestamped
