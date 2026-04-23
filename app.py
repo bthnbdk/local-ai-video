@@ -15,7 +15,20 @@ def get_projects():
 
 @app.route("/")
 def dashboard():
-    return render_template("dashboard.html", projects=get_projects())
+    projects_data = []
+    for p in get_projects():
+        provider = "Local"
+        sm_path = os.path.join("projects", p, "state.json")
+        if os.path.exists(sm_path):
+            try:
+                with open(sm_path) as f:
+                    state = json.load(f)
+                    if state.get("config", {}).get("llm", {}).get("backend") == "gemini":
+                        provider = "Cloud"
+            except:
+                pass
+        projects_data.append({"id": p, "provider": provider})
+    return render_template("dashboard.html", projects=projects_data)
 
 @app.route("/project/new", methods=["GET", "POST"])
 def create_project():
@@ -23,11 +36,17 @@ def create_project():
         data = request.form
         project_id = data.get("project_name", "untitled_project")
         
+        provider = data.get("llm_provider", "local")
+        if provider == "cloud":
+            llm_config = {"backend": "gemini"}
+        else:
+            llm_config = {"backend": "lmstudio", "model": "local-model", "host": "http://localhost:1234"}
+            
         config = {
             "project_name": project_id,
             "topic": data.get("topic"),
             "style": {"mode": "library", "name": data.get("style", "cinematic_dark"), "freetext": ""},
-            "llm": {"backend": "lmstudio", "model": "local-model", "host": "http://localhost:1234"},
+            "llm": llm_config,
             "tts": {"backend": "kokoro"},
             "image": {"backend": "auto"},
             "pipeline": {

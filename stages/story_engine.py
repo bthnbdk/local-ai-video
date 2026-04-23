@@ -2,6 +2,7 @@ import os
 import json
 from core.json_parser import parse_llm_json
 from core.schemas import ScriptJSON
+from backends.llm.gemini_backend import generate_text as gemini_gen
 from backends.llm.lmstudio_backend import generate_text as lmstudio_gen, eject_model as lmstudio_eject
 from backends.llm.ollama_backend import generate_text as ollama_gen
 
@@ -49,7 +50,9 @@ def run(project_dir: str, config: dict, log_cb=None):
     
     def llm_call(p):
         backend_type = config.get("llm", {}).get("backend", "lmstudio")
-        if backend_type == "ollama":
+        if backend_type == "gemini":
+            return gemini_gen(p, config.get("llm", {}))
+        elif backend_type == "ollama":
             return ollama_gen(p, config.get("llm", {}))
         return lmstudio_gen(p, config.get("llm", {}))
         
