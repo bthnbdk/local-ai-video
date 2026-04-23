@@ -11,9 +11,9 @@ soundfile==0.12.1
 gunicorn==21.2.0
 open_clip_torch==2.24.0
 onnxruntime==1.17.1
-torch==2.2.1
-torchvision==0.17.1
-torchaudio==2.2.1
+torch>=2.7.1
+torchvision>=0.18.0
+torchaudio>=2.3.0
 
 # Optional/Platform specific (handled by setup.sh or user)
 # mflux  # macOS M-series
