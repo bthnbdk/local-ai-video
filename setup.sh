@@ -34,6 +34,11 @@ curl -L -o models/midas/midas_v21_small_256.pt \
 
 # 7. Kokoro TTS (ARM native ONNX)
 pip install kokoro-onnx
+mkdir -p models/kokoro
+curl -L -o models/kokoro/kokoro-v1.0.onnx \
+  "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files/kokoro-v1.0.onnx"
+curl -L -o models/kokoro/voices-v1.0.bin \
+  "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files/voices-v1.0.bin"
 
 # 8. mflux (FLUX on Apple Silicon via MLX)
 pip install mflux
