@@ -14,7 +14,7 @@ def create_project(args):
     config = {
         "project_name": project_id,
         "topic": args.topic,
-        "llm": {"backend": "ollama", "model": "mistral:7b-instruct-q4_K_M", "host": "http://localhost:11434"},
+        "llm": {"backend": "lmstudio", "model": "local-model", "host": "http://localhost:1234"},
         "tts": {"backend": "kokoro", "voice": "af_sarah", "speed": 1.0},
         "image": {"backend": "auto", "steps": 4, "guidance_scale": 7.5},
         "style": {"mode": "library", "name": args.style, "freetext": ""},

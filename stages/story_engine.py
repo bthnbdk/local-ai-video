@@ -2,7 +2,8 @@ import os
 import json
 from core.json_parser import parse_llm_json
 from core.schemas import ScriptJSON
-from backends.llm.ollama_backend import generate_text
+from backends.llm.lmstudio_backend import generate_text as lmstudio_gen
+from backends.llm.ollama_backend import generate_text as ollama_gen
 
 STRICT_PROMPT = """You MUST return valid JSON only.
 
@@ -47,7 +48,10 @@ def run(project_dir: str, config: dict, log_cb=None):
     )
     
     def llm_call(p):
-        return generate_text(p, config.get("llm", {}))
+        backend_type = config.get("llm", {}).get("backend", "lmstudio")
+        if backend_type == "ollama":
+            return ollama_gen(p, config.get("llm", {}))
+        return lmstudio_gen(p, config.get("llm", {}))
         
     if log_cb: log_cb("Generating story from LLM...")
     raw_response = llm_call(prompt)

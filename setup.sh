@@ -47,7 +47,10 @@ pip install mflux
 pip install whisper-timestamped
 
 # 10. Utilities
-pip install audiocraft rembg basicsr realesrgan timm diffusers transformers accelerate
+pip install rembg basicsr realesrgan timm diffusers transformers accelerate
+
+# 11. Audiocraft (No-deps to prevent Torch downgrade on Apple Silicon)
+pip install --no-deps audiocraft==1.3.0
 
 echo ""
 echo "=== Setup complete ==="
