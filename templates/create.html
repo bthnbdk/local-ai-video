@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid grid-cols-12 gap-6 h-full">
+    <div class="col-span-12 md:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-8 flex flex-col justify-between">
+        <div>
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold tracking-tight">Create New Video</h2>
+                <a href="/" class="text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">&larr; Back</a>
+            </div>
+            <form id="createForm" class="space-y-6">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Project Name</label>
+                    <input type="text" name="project_name" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors" placeholder="e.g. history_of_rome" required>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Topic / Script (Max 2000 chars)</label>
+                    <textarea name="topic" rows="5" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white resize-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors" placeholder="Explain the topic for the video..." required></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Visual Style</label>
+                        <div class="relative">
+                            <select name="style" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">
+                                <option value="cinematic_dark">Cinematic Dark</option>
+                                <option value="anime_pastel">Anime Pastel</option>
+                                <option value="watercolor_soft">Watercolor Soft</option>
+                                <option value="pixel_art_8bit">8-Bit Pixel Art</option>
+                                <option value="documentary_neutral">Documentary / Realistic</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Music Genre (Global)</label>
+                        <div class="relative">
+                            <select name="music_genre" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-emerald-500 hover:border-zinc-700 transition-colors">
+                                <option value="">Auto (Match Scenes)</option>
+                                <option value="Cinematic Orchestral">Cinematic Orchestral</option>
+                                <option value="Lo-Fi Hip Hop">Lo-Fi Hip Hop</option>
+                                <option value="8-bit Retro Chiptune">8-bit Retro Chiptune</option>
+                                <option value="Synthwave / Outrun">Synthwave / Outrun</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Bring Your Own Audio (BYOA) Bypass</label>
+                    <input type="text" name="music_file" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-emerald-100 placeholder-zinc-700 focus:outline-none focus:border-emerald-500 hover:border-zinc-700 transition-colors" placeholder="/path/to/custom/audio.wav (Leaves AI Generator Idle)">
+                </div>
+                <div class="pt-6">
+                    <button type="submit" class="w-full bg-blue-600 shadow-lg shadow-blue-900/20 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition uppercase tracking-widest text-xs">Generate Video Pipeline</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Right Side Info -->
+    <div class="col-span-12 md:col-span-4 grid grid-rows-[auto_1fr] gap-6">
+        <!-- Settings box -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+            <h3 class="text-[10px] font-bold uppercase text-zinc-500 tracking-widest mb-4">Pipeline Settings</h3>
+            <label class="flex items-start gap-4 p-4 bg-zinc-950 rounded-2xl border border-zinc-800 cursor-pointer hover:border-zinc-700 transition-colors group">
+                <input type="checkbox" form="createForm" name="preview_mode" id="preview_mode" class="mt-1 h-5 w-5 bg-zinc-900 border-zinc-700 rounded text-blue-600 focus:ring-blue-500 focus:ring-offset-zinc-950">
+                <div>
+                    <span class="block text-sm font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">Preview Mode</span>
+                    <p class="text-xs text-zinc-500 leading-relaxed">Use fast models, low resolution (512x288), no upscale or depth rendering to save RAM.</p>
+                </div>
+            </label>
+        </div>
+
+        <!-- System box -->
+        <div class="bg-blue-600 rounded-3xl p-8 flex flex-col justify-end shadow-lg shadow-blue-900/20 bg-gradient-to-br from-blue-600 to-blue-800">
+            <div class="mb-auto p-3 bg-white/20 rounded-xl w-fit">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+            </div>
+            <div>
+                <h3 class="text-3xl font-black mb-2 italic text-white leading-tight">M4 Optimized</h3>
+                <p class="text-blue-200 font-bold uppercase tracking-widest text-[10px]">100% Local Inference Engine</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('createForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const res = await fetch('/project/new', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.redirect) window.location.href = data.redirect;
+});
+</script>
+{% endblock %}

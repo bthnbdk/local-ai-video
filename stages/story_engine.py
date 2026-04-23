@@ -1,0 +1,63 @@
+import os
+import json
+from core.json_parser import parse_llm_json
+from core.schemas import ScriptJSON
+from backends.llm.ollama_backend import generate_text
+
+STRICT_PROMPT = """You MUST return valid JSON only.
+
+STRICT RULES:
+- Output ONLY the JSON object/array. Nothing else.
+- Do NOT include explanations, comments, or markdown
+- Do NOT include trailing commas
+- Use double quotes for ALL keys and string values
+- Ensure syntactically valid JSON per RFC 8259
+
+Follow this exact schema:
+{schema}
+
+Topic: {topic}
+Create a high-quality script with {scenes_count} scenes.
+Return JSON now:"""
+
+RETRY_PROMPT = """Your previous output was invalid JSON.
+Error: {error}
+
+Rules:
+- Do NOT change content — only fix syntax
+- Remove any markdown code fences
+- Ensure all keys and strings use double quotes
+- Remove trailing commas
+- Return ONLY the corrected JSON
+
+Previous output:
+{previous_output}
+
+Corrected JSON:"""
+
+def run(project_dir: str, config: dict, log_cb=None):
+    topic = config.get("topic", "Default topic")
+    scenes_count = max(3, min(12, len(topic.split()) // 5))
+    if scenes_count < 3: scenes_count = 3
+    
+    prompt = STRICT_PROMPT.format(
+        schema=ScriptJSON.model_json_schema(),
+        topic=topic,
+        scenes_count=scenes_count
+    )
+    
+    def llm_call(p):
+        return generate_text(p, config.get("llm", {}))
+        
+    if log_cb: log_cb("Generating story from LLM...")
+    raw_response = llm_call(prompt)
+    
+    # parse + fix layers
+    script_obj = parse_llm_json(raw_response, ScriptJSON, llm_call, RETRY_PROMPT)
+    
+    out_path = os.path.join(project_dir, "script.json")
+    with open(out_path, "w") as f:
+        f.write(script_obj.model_dump_json(indent=2))
+        
+    if log_cb: log_cb(f"Story engine finished. Output saved to {out_path}.")
+    return True

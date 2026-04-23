@@ -1,0 +1,29 @@
+Flask==3.0.2
+Flask-SSE==1.0.3
+pydantic==2.6.2
+psutil==5.9.8
+rapidfuzz==3.6.1
+librosa==0.10.1
+requests==2.31.0
+numpy==1.26.4
+Pillow==10.2.0
+soundfile==0.12.1
+gunicorn==21.2.0
+open_clip_torch==2.24.0
+onnxruntime==1.17.1
+torch==2.2.1
+torchvision==0.17.1
+torchaudio==2.2.1
+
+# Optional/Platform specific (handled by setup.sh or user)
+# mlx-flux  # macOS M-series
+# kokoro-onnx
+# diffusers
+# transformers
+# accelerate
+# whisper-timestamped
+# rembg
+# basicsr
+# realesrgan
+# timm
+# audiocraft

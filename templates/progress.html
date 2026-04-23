@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid grid-cols-12 gap-6 h-full">
+    <!-- Header -->
+    <div class="col-span-12 flex justify-between items-center bg-zinc-900/50 border border-zinc-800 rounded-3xl p-6">
+        <div>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-1">Project Status</p>
+            <h2 class="text-3xl font-bold tracking-tight text-white">{{ project_id }}</h2>
+        </div>
+        <a href="/" class="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-bold rounded-xl transition uppercase tracking-widest text-[10px]">&larr; Dashboard</a>
+    </div>
+
+    <!-- Active logs stream (Bento style) -->
+    <div class="col-span-12 md:col-span-5 bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col min-h-[500px]">
+        <div class="flex items-center justify-between mb-4 pb-4 border-b border-zinc-800">
+            <div class="flex items-center gap-3">
+                <div class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                <h3 class="text-xs font-bold uppercase text-zinc-100 tracking-widest">System Logs</h3>
+            </div>
+            <span class="text-[10px] font-mono text-zinc-500" id="liveIndicator">LIVE STREAM</span>
+        </div>
+        <div class="flex-grow font-mono text-xs overflow-y-auto space-y-2 pr-2 leading-relaxed" id="logContainer">
+            <p class="text-zinc-600">Waiting for pipeline events...</p>
+        </div>
+    </div>
+
+    <!-- Stages Grid -->
+    <div class="col-span-12 md:col-span-7 bg-zinc-900 border border-zinc-800 rounded-3xl p-8">
+        <h3 class="text-xs font-bold uppercase text-zinc-500 tracking-widest mb-6">Pipeline Workflow</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="stagesGrid">
+            {% for stage, data in state.stages.items() %}
+            <div class="p-4 rounded-2xl border stage-card status-{{ data.status }} transition-all flex flex-col justify-between h-24" data-stage="{{ stage }}">
+                <h4 class="font-bold text-sm tracking-tight capitalize">{{ stage | replace('_', ' ') }}</h4>
+                <p class="text-[9px] status-text uppercase tracking-widest font-black">{{ data.status }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Bento-adjusted colors for stages */
+    .status-pending { background-color: #09090b; border-color: #27272a; }
+    .status-pending .status-text { color: #52525b; }
+    .status-running { background-color: #1e3a8a; border-color: #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.2); }
+    .status-running h4 { color: #eff6ff; }
+    .status-running .status-text { color: #93c5fd; }
+    .status-completed { background-color: #064e3b; border-color: #10b981; }
+    .status-completed h4 { color: #ecfdf5; }
+    .status-completed .status-text { color: #6ee7b7; }
+    .status-failed { background-color: #7f1d1d; border-color: #ef4444; }
+    .status-failed h4 { color: #fef2f2; }
+    .status-failed .status-text { color: #fca5a5; }
+
+    /* custom scrollbar for logs */
+    #logContainer::-webkit-scrollbar { width: 6px; }
+    #logContainer::-webkit-scrollbar-track { background: transparent; }
+    #logContainer::-webkit-scrollbar-thumb { background: #27272a; border-radius: 6px; }
+    #logContainer::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+</style>
+
+<script>
+    const projectId = "{{ project_id }}";
+    const logContainer = document.getElementById('logContainer');
+    const liveIndicator = document.getElementById('liveIndicator');
+    
+    const evtSource = new EventSource(`/project/${projectId}/stream`);
+    evtSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        if (data.type === 'log') {
+            const p = document.createElement('div');
+            // Remove previous wait text if exists
+            if(logContainer.children[0] && logContainer.children[0].textContent.includes('Waiting for')) {
+                logContainer.innerHTML = '';
+            }
+            p.className = data.level === 'error' ? 'text-red-400 font-bold' : (data.level === 'warn' ? 'text-yellow-400' : 'text-zinc-400');
+            p.textContent = `> ${data.message}`;
+            logContainer.appendChild(p);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        } else if (data.type === 'done') {
+            evtSource.close();
+            const p = document.createElement('div');
+            p.className = 'text-emerald-400 font-black mt-4 pt-4 border-t border-zinc-800';
+            p.textContent = '> PIPELINE COMPLETED SUCCESSFULLY';
+            logContainer.appendChild(p);
+            logContainer.scrollTop = logContainer.scrollHeight;
+            liveIndicator.textContent = 'FINISHED';
+            liveIndicator.className = 'text-[10px] font-mono text-emerald-500';
+        }
+    };
+</script>
+{% endblock %}

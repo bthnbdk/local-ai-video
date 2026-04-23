@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="grid grid-cols-12 gap-6 h-full">
+    <!-- Header Section -->
+    <div class="col-span-12 flex justify-between items-center bg-zinc-900/50 border border-zinc-800 rounded-3xl p-6">
+        <div>
+            <h2 class="text-4xl font-bold tracking-tight mb-1">Projects</h2>
+            <p class="text-zinc-500 text-sm">Manage your local AI video generation projects</p>
+        </div>
+        <a href="/project/new" class="bg-blue-600 shadow-lg shadow-blue-900/20 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-2xl transition uppercase tracking-widest text-xs flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            New
+        </a>
+    </div>
+
+    <!-- Projects Grid -->
+    {% for p in projects %}
+    <div class="col-span-12 md:col-span-6 lg:col-span-4 bg-zinc-900 border border-zinc-800 rounded-3xl p-8 flex flex-col justify-between hover:border-zinc-600 hover:bg-zinc-800/80 transition-all cursor-pointer group min-h-[220px]" onclick="window.location.href='/project/{{ p }}/progress'">
+        <div>
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-10 h-10 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-400 group-hover:text-blue-400 group-hover:bg-blue-900/20 group-hover:border-blue-800 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+                <span class="px-3 py-1 bg-zinc-800/50 text-zinc-400 border border-zinc-700 rounded-full text-[10px] font-bold uppercase tracking-widest">Local</span>
+            </div>
+            <h3 class="text-2xl font-bold tracking-tight mb-2 group-hover:text-blue-400 transition-colors">{{ p }}</h3>
+        </div>
+        <div class="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-zinc-500 mt-6 pt-4 border-t border-zinc-800 group-hover:border-zinc-700">
+            <span>View Progress</span>
+            <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-span-12 md:col-span-8 bg-zinc-900 border border-zinc-800 rounded-3xl p-10 flex flex-col justify-center min-h-[300px]">
+        <h3 class="text-3xl font-bold tracking-tight mb-2">No projects yet</h3>
+        <p class="text-zinc-500 mb-8 max-w-sm text-lg">Create your first cinematic video project and watch the local rendering pipeline in action.</p>
+        <a href="/project/new" class="w-max bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-bold py-3 px-8 rounded-xl transition uppercase tracking-widest text-xs">Start Now</a>
+    </div>
+    <div class="col-span-12 md:col-span-4 bg-blue-600 rounded-3xl p-8 shadow-lg shadow-blue-900/20 flex flex-col justify-between">
+        <div class="p-3 bg-white/20 rounded-xl w-fit mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <div>
+            <h3 class="text-4xl font-black mb-2 italic text-white">READY</h3>
+            <p class="text-blue-100 font-bold uppercase tracking-widest text-[10px]">M4 Pipeline Online</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

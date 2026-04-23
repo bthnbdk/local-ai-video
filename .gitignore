@@ -1,0 +1,14 @@
+# .gitignore
+.venv/
+models/
+projects/*/images/
+projects/*/upscaled/
+projects/*/masks/
+projects/*/depth/
+projects/*/scenes/
+projects/*/overlaid/
+projects/*/audio*.wav
+projects/*/final/
+__pycache__/
+*.pyc
+.DS_Store

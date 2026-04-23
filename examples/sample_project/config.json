@@ -1,0 +1,35 @@
+{
+  "project_name": "sample_myvideo",
+  "topic": "The history of the Roman Empire",
+  "llm": {
+    "backend": "ollama",
+    "model": "mistral:7b-instruct-q4_K_M",
+    "host": "http://localhost:11434",
+    "temperature": 0.7,
+    "max_tokens": 4096
+  },
+  "tts": {
+    "backend": "kokoro",
+    "voice": "af_sarah",
+    "speed": 1.0
+  },
+  "image": {
+    "backend": "auto",
+    "steps": 4,
+    "guidance_scale": 7.5
+  },
+  "style": {
+    "mode": "library",
+    "name": "cinematic_dark",
+    "freetext": "",
+    "hybrid_names": [],
+    "hybrid_weights": []
+  },
+  "pipeline": {
+    "depth_enabled": false,
+    "music_mode": "none",
+    "music_file": "",
+    "preview_mode": false,
+    "preview_resolution": "512x288"
+  }
+}

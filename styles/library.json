@@ -1,0 +1,182 @@
+[
+  {
+    "style_name": "cinematic_dark",
+    "base_prompt": "cinematic photography, dramatic composition, high contrast, professional color grading",
+    "color_palette": "desaturated blues, deep shadows, selective warm highlights",
+    "lighting": "three-point lighting, strong rim light, motivated sources",
+    "camera": "anamorphic lens, shallow depth of field, slight lens flare",
+    "texture": "subtle film grain, crisp edges, photoreal surfaces",
+    "negative_prompt": "cartoon, anime, flat colors, overexposed, amateur, watermark, text"
+  },
+  {
+    "style_name": "anime_pastel",
+    "base_prompt": "high quality anime screenshot, Makoto Shinkai style, ethereal, highly detailed",
+    "color_palette": "pastel pinks, soft blues, bright daylight, mint greens",
+    "lighting": "soft diffused sunlight, glowing bloom, volumetric light rays",
+    "camera": "wide angle, slight fisheye, bright exposure",
+    "texture": "cel shaded, watercolor backgrounds, clean lines",
+    "negative_prompt": "3D, photorealistic, dark, gritty, grayscale, ugly, distorted"
+  },
+  {
+    "style_name": "watercolor_soft",
+    "base_prompt": "soft watercolor painting, ethereal brush strokes, delicate, traditional art",
+    "color_palette": "translucent washes, soft primary colors, paper white highlights",
+    "lighting": "flat natural light, no harsh shadows, airy",
+    "camera": "imperceptible, flat 2D perspective",
+    "texture": "rough cold-pressed watercolor paper, pigment blooms, wet-on-wet",
+    "negative_prompt": "glossy, digital, photorealistic, 3D render, sharp edges, neon"
+  },
+  {
+    "style_name": "oil_painting_baroque",
+    "base_prompt": "classic baroque oil painting, masterwork, dramatic chiaroscuro, ornate",
+    "color_palette": "deep reds, rich golds, dark umber, stark black",
+    "lighting": "single dramatic light source, high contrast shadows, spotlight effect",
+    "camera": "classic portrait angle, medium shot, eye level",
+    "texture": "thick impasto brush strokes, cracked canvas, glossy varnish",
+    "negative_prompt": "modern, low contrast, anime, digital art, flat lighting"
+  },
+  {
+    "style_name": "pixel_art_8bit",
+    "base_prompt": "8-bit pixel art, retro video game style, isometric or side-scrolling, nostalgic",
+    "color_palette": "limited 256-color palette, vibrant neon primaries, solid blacks",
+    "lighting": "flat shading, no gradients, hard light",
+    "camera": "top-down or pure side profile, orthogonal projection",
+    "texture": "blocky pixels, sharp edges, no anti-aliasing, retro screen artifacts",
+    "negative_prompt": "high resolution, photorealistic, soft gradients, 3D, curved lines"
+  },
+  {
+    "style_name": "synthwave_neon",
+    "base_prompt": "synthwave aesthetic, 1980s retro-futurism, outrun style, glowing grid",
+    "color_palette": "neon magenta, cyan, electric purple, dark background",
+    "lighting": "glowing neon tubes, stark rim lighting, dark moody atmosphere",
+    "camera": "low angle, dramatic perspective towards vanishing point",
+    "texture": "smooth plastic, glossy reflections, scanlines, VHS tracking errors",
+    "negative_prompt": "natural, daylight, rustic, vintage, soft colors, matte"
+  },
+  {
+    "style_name": "documentary_neutral",
+    "base_prompt": "National Geographic documentary photography, photojournalism, realistic",
+    "color_palette": "true-to-life colors, natural earth tones, balanced white balance",
+    "lighting": "natural ambient daylight, realistic overcast or sun",
+    "camera": "50mm prime lens, deep focus, sharp subject",
+    "texture": "hyperrealistic, sharp details, subtle sensor noise",
+    "negative_prompt": "stylized, painting, dramatic color grade, fake, CGI, extreme angles"
+  },
+  {
+    "style_name": "comic_book_bold",
+    "base_prompt": "American comic book art, graphic novel style, bold ink lines, dynamic",
+    "color_palette": "vibrant CMYK halftones, high saturation, sharp contrasts",
+    "lighting": "flat comic coloring, stark black ink shadows (chiaroscuro)",
+    "camera": "dynamic dutch angle, extreme forced perspective",
+    "texture": "halftone dots, thick black outlines, matte paper texture",
+    "negative_prompt": "photorealistic, 3D render, soft watercolor, blurred details"
+  },
+  {
+    "style_name": "studio_ghibli",
+    "base_prompt": "Studio Ghibli style animation, Hayao Miyazaki, enchanting, lush environment",
+    "color_palette": "vibrant greens, clear blue skies, warm cozy interiors",
+    "lighting": "soft, warm sunlight, dappled light through leaves",
+    "camera": "wide environmental setup, gentle perspective",
+    "texture": "hand-painted gouache backgrounds, clean cel-shaded subjects",
+    "negative_prompt": "dark, gritty, 3D, CGI, photorealism, sharp mechanical edges"
+  },
+  {
+    "style_name": "noir_bw",
+    "base_prompt": "1940s film noir, black and white photography, hardboiled detective style",
+    "color_palette": "pure black and white, grayscale, stark high contrast",
+    "lighting": "venetian blind shadows, harsh spotlights, silhouette lighting",
+    "camera": "low camera angle, slight distortion, wide angle",
+    "texture": "heavy film grain, deep blacks, high ISO noise",
+    "negative_prompt": "color, vibrant, modern, flat lighting, soft edges"
+  },
+  {
+    "style_name": "cyberpunk_rain",
+    "base_prompt": "cyberpunk city, dystopian future, high tech low life, cinematic",
+    "color_palette": "neon blues and pinks against dark grays, reflective puddles",
+    "lighting": "neon signs, harsh LED streetlights, volumetric fog",
+    "camera": "wide cinematic view, shallow depth of field on near objects",
+    "texture": "wet asphalt, metallic surfaces, grime, rain drops on lens",
+    "negative_prompt": "historical, nature, bright daylight, clean, utopian, soft"
+  },
+  {
+    "style_name": "vintage_film_grain",
+    "base_prompt": "1970s kodachrome photography, vintage polaroid, retro indie film",
+    "color_palette": "warm faded yellows, muted greens, crushed blacks with reddish tint",
+    "lighting": "golden hour sunlight, soft natural light, mild lens flares",
+    "camera": "35mm manual focus, slightly soft edges, light leaks",
+    "texture": "heavy film grain, dust and scratches, fuzzy details",
+    "negative_prompt": "sharp, modern, digital crispness, HDR, neon colors"
+  },
+  {
+    "style_name": "minimalist_flat",
+    "base_prompt": "minimalist vector art, corporate memphis, flat design, modern UI illustration",
+    "color_palette": "pastel colors, cohesive solid fills, no gradients",
+    "lighting": "none, uniform flat color blocks",
+    "camera": "pure 2D, zero perspective",
+    "texture": "infinitely smooth, vector crisp edges, clean cut",
+    "negative_prompt": "gradients, shadows, 3D, reality, outlines, dirty"
+  },
+  {
+    "style_name": "fantasy_epic",
+    "base_prompt": "epic high fantasy concept art, Lord of the Rings style, sweeping vistas",
+    "color_palette": "rich jewel tones, emerald greens, deep blues, gold accents",
+    "lighting": "dramatic sky lighting, god rays, magical glowing auras",
+    "camera": "extreme wide sweeping angle, imposing scale",
+    "texture": "digital painting masterwork, intricate details, smooth blending",
+    "negative_prompt": "modern, sci-fi, photo, urban, minimalist, dull"
+  },
+  {
+    "style_name": "surrealist_dali",
+    "base_prompt": "surrealist painting, Salvador Dali style, dreamlike, impossible physics",
+    "color_palette": "vivid desert colors, harsh stark contrasts, alien skies",
+    "lighting": "harsh desert sunlight, long elongated shadows",
+    "camera": "warped perspective, infinite horizon line",
+    "texture": "smooth oil painting, melting objects, highly rendered reality",
+    "negative_prompt": "normal, realistic, modern city, photography, sketch"
+  },
+  {
+    "style_name": "ukiyo_e_woodblock",
+    "base_prompt": "traditional Japanese Ukiyo-e woodblock print, Hokusai style, historical",
+    "color_palette": "indigo, vermilion red, faded parchment colors, muted tones",
+    "lighting": "flat natural light, no real shading",
+    "camera": "traditional 2D composition, highly stylized waves/clouds",
+    "texture": "wood grain texture, paper texture, block-printed ink",
+    "negative_prompt": "3d render, modern, photo, neon, glossy, realism"
+  },
+  {
+    "style_name": "vaporwave_aesthetic",
+    "base_prompt": "vaporwave aesthetic, early internet 3D graphics, greek busts, grid",
+    "color_palette": "pastel pink, teal, Windows 95 gray, sunset gradients",
+    "lighting": "synthetic lighting, harsh neon gradients",
+    "camera": "awkward early 3D camera angles, isometric or deep perspective",
+    "texture": "low poly, early CGI reflections, digital static",
+    "negative_prompt": "nature, organic, detailed painting, high quality photo"
+  },
+  {
+    "style_name": "horror_atmospheric",
+    "base_prompt": "psychological horror, liminal space, unsettling atmosphere, terrifying",
+    "color_palette": "sickly greens, oppressive dark grays, blood red accents",
+    "lighting": "flickering fluorescent light, deep impenetrable shadows",
+    "camera": "voyeuristic angle, slightly tilted (dutch angle), confined space",
+    "texture": "grimy, moldy, harsh digital noise, VHS distortion",
+    "negative_prompt": "happy, bright, colorful, comedy, clean, cartoon"
+  },
+  {
+    "style_name": "children_book_illustration",
+    "base_prompt": "classic children's book illustration, whimsical, warm, friendly",
+    "color_palette": "bright primary colors, soft warm pastels",
+    "lighting": "soft, warm gentle ambient light",
+    "camera": "eye-level of a child, straightforward perspective",
+    "texture": "colored pencil texture, soft watercolor washes",
+    "negative_prompt": "dark, scary, photorealistic, 3D CGI, violent"
+  },
+  {
+    "style_name": "scientific_diagram",
+    "base_prompt": "scientific textbook diagram, informative, vintage botanical or anatomy style",
+    "color_palette": "off-white paper background, sepia ink, clinical muted colors",
+    "lighting": "flat illustrative light, zero shadows",
+    "camera": "pure top-down or orthogonal cross-section",
+    "texture": "stipple shading, fine pen and ink crosshatching",
+    "negative_prompt": "action, dynamic, camera effects, cinematic, blur"
+  }
+]
