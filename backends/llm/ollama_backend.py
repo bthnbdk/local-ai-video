@@ -10,7 +10,7 @@ def generate_text(prompt: str, config: dict) -> str:
         req = urllib.request.Request(f"{host}/api/generate", 
             data=json.dumps({"model": model, "prompt": prompt, "stream": False}).encode(),
             headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with urllib.request.urlopen(req, timeout=300) as r:
             return json.loads(r.read().decode())["response"]
     except (urllib.error.URLError, ConnectionError) as e:
         raise ConnectionError(f"Ollama is not running. Please run 'ollama serve'. Error: {e}")

@@ -27,7 +27,7 @@ def create_project():
             "project_name": project_id,
             "topic": data.get("topic"),
             "style": {"mode": "library", "name": data.get("style", "cinematic_dark"), "freetext": ""},
-            "llm": {"backend": "ollama", "model": "mistral"},
+            "llm": {"backend": "lmstudio", "model": "local-model", "host": "http://localhost:1234"},
             "tts": {"backend": "kokoro"},
             "image": {"backend": "auto"},
             "pipeline": {
