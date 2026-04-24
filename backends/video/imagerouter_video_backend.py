@@ -17,6 +17,11 @@ def generate_video(prompt: str, image_path: str, output_path: str, target_durati
     }
     
     seconds = get_closest_duration(target_duration)
+    
+    prompt = prompt if prompt and len(prompt) > 2 else "cinematic motion, high quality, smooth movement"
+    
+    # Cap prompt to 3000 chars if somehow longer, though rare
+    prompt = prompt[:3000]
 
     try:
         with open(image_path, "rb") as image_file:
@@ -46,4 +51,5 @@ def generate_video(prompt: str, image_path: str, output_path: str, target_durati
             raise Exception(f"API returned status code {response.status_code}: {response.text}")
     except Exception as e:
         raise Exception(f"Failed to generate video: {str(e)}")
+
 

@@ -16,12 +16,6 @@ torch>=2.7.1
 torchvision>=0.26.0
 torchaudio>=2.3.0
 mflux>=0.17.5
-# Audiocraft explicit sub-dependencies (without xformers)
-hydra-core==1.3.2
-omegaconf==2.3.0
-einops==0.7.0
-julius==0.2.7
-num2words==0.5.13
 google-generativeai>=0.8.0
 google-auth
 websockets
