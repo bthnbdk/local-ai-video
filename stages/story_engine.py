@@ -45,6 +45,12 @@ def run(project_dir: str, config: dict, log_cb=None):
     tts_backend = config.get("tts", {}).get("backend", "local")
     llm_backend = config.get("llm", {}).get("backend", "local")
     
+    story_profile = config.get("pipeline", {}).get("story_profile", "youtube")
+    prof_path = os.path.join("templates", "prompts", f"{story_profile}_master.txt")
+    profile_rules = ""
+    if os.path.exists(prof_path):
+        with open(prof_path) as f: profile_rules = f.read() + "\n\n"
+    
     grok_rules = ""
     if tts_backend == "xai" or llm_backend == "xai_llm":
         grok_rules = """
@@ -56,7 +62,7 @@ Use these tags frequently to make the narration sound expressive and human.
 
 Think step-by-step about the visual flow before outputting the final JSON. Ensure the 'mood' and 'emotion' tags perfectly match the narrative for Grok TTS integration.
 """
-    prompt = grok_rules + STRICT_PROMPT.format(
+    prompt = profile_rules + grok_rules + STRICT_PROMPT.format(
         schema=ScriptJSON.model_json_schema(),
         topic=topic,
         scenes_count=scenes_count

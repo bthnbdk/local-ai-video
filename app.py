@@ -39,13 +39,19 @@ def create_project():
         data = request.form
         project_id = data.get("project_name", "untitled_project")
         
+        text_control = data.get("text_control", "allow")
+        fps = int(data.get("fps", 30))
+        transition = data.get("transition", "crossfade")
+        subtitles = data.get("subtitles") == "on"
+        llm_temperature = float(data.get("llm_temperature", 0.7))
+        
         provider = data.get("llm_provider", "local")
         if provider == "cloud":
-            llm_config = {"backend": "gemini"}
+            llm_config = {"backend": "gemini", "temperature": llm_temperature}
         elif provider == "xai_llm":
-            llm_config = {"backend": "xai_llm"}
+            llm_config = {"backend": "xai_llm", "temperature": llm_temperature}
         else:
-            llm_config = {"backend": "lmstudio", "model": "local-model", "host": "http://localhost:1234"}
+            llm_config = {"backend": "lmstudio", "model": "local-model", "host": "http://localhost:1234", "temperature": llm_temperature}
             
         img_source = data.get("image_source", "local")
         image_config = {"backend": "auto"}
@@ -114,9 +120,15 @@ def create_project():
             "image": image_config,
             "pipeline": {
                 "preview_mode": data.get("preview_mode") == "on",
+                "aspect_ratio": data.get("aspect_ratio", "16:9"),
+                "story_profile": data.get("story_profile", "youtube"),
                 "music_genre": data.get("music_genre", ""),
                 "music_mode": "local" if data.get("music_file", "").strip() else "generated",
-                "music_file": data.get("music_file", "").strip()
+                "music_file": data.get("music_file", "").strip(),
+                "text_control": text_control,
+                "fps": fps,
+                "transition": transition,
+                "subtitles": subtitles
             }
         }
         sm = StateManager(project_id)
@@ -130,7 +142,58 @@ def create_project():
         threading.Thread(target=run_pipe).start()
         return jsonify({"success": True, "redirect": f"/project/{project_id}/progress"})
         
-    return render_template("create.html")
+    styles_path = os.path.join("templates", "prompts", "styles.json")
+    styles = []
+    if os.path.exists(styles_path):
+        with open(styles_path, 'r') as f:
+            styles = json.load(f)
+    return render_template("create.html", styles=styles)
+
+@app.route("/settings/styles", methods=["GET", "POST"])
+def manage_styles():
+    styles_path = os.path.join("templates", "prompts", "styles.json")
+    if request.method == "POST":
+        # Overwrite entire styles.json from submitted textarea
+        styles_json_str = request.form.get("styles_json", "[]")
+        try:
+            styles_data = json.loads(styles_json_str)
+            with open(styles_path, "w") as f:
+                json.dump(styles_data, f, indent=4)
+            return render_template("styles.html", success=True, styles_json=json.dumps(styles_data, indent=4))
+        except Exception as e:
+            return render_template("styles.html", error=str(e), styles_json=styles_json_str)
+            
+    styles_json_str = "[\n]"
+    if os.path.exists(styles_path):
+        with open(styles_path, 'r') as f:
+            styles_json_str = f.read()
+    return render_template("styles.html", styles_json=styles_json_str)
+
+@app.route("/prompts", methods=["GET", "POST"])
+def edit_prompts():
+    prompt_dir = os.path.join("templates", "prompts")
+    if not os.path.exists(prompt_dir): os.makedirs(prompt_dir, exist_ok=True)
+    
+    if request.method == "POST":
+        for file in ["youtube_master.txt", "tiktok_master.txt"]:
+            if file in request.form:
+                with open(os.path.join(prompt_dir, file), "w") as f:
+                    f.write(request.form.get(file))
+        return render_template("prompts.html", success=True, 
+                               youtube=request.form.get("youtube_master.txt"),
+                               tiktok=request.form.get("tiktok_master.txt"))
+                               
+    yt_code = ""
+    yt_path = os.path.join(prompt_dir, "youtube_master.txt")
+    if os.path.exists(yt_path):
+        with open(yt_path) as f: yt_code = f.read()
+        
+    tk_code = ""
+    tk_path = os.path.join(prompt_dir, "tiktok_master.txt")
+    if os.path.exists(tk_path):
+        with open(tk_path) as f: tk_code = f.read()
+
+    return render_template("prompts.html", success=False, youtube=yt_code, tiktok=tk_code)
 
 import shutil
 

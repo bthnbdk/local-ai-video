@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="h-full bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-5xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-bold tracking-tight">Style Presets Manager</h2>
+        <a href="/" class="text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">&larr; Dashboard</a>
+    </div>
+    
+    {% if success %}
+    <div class="bg-emerald-900/20 border border-emerald-800 text-emerald-400 text-sm font-bold p-4 rounded-xl mb-6">
+        Styles saved successfully.
+    </div>
+    {% endif %}
+    {% if error %}
+    <div class="bg-red-900/20 border border-red-800 text-red-400 text-sm font-bold p-4 rounded-xl mb-6">
+        Error saving styles: {{ error }}
+    </div>
+    {% endif %}
+
+    <p class="text-sm text-zinc-400 mb-6">Edit the raw JSON below to add, remove, or modify style presets. Each requires an `id`, `name`, `positive_suffix`, and `negative_suffix`.</p>
+
+    <form method="POST" class="space-y-6">
+        <div class="h-[500px]">
+            <textarea name="styles_json" class="w-full h-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white font-mono text-sm resize-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">{{ styles_json }}</textarea>
+        </div>
+
+        <div class="pt-6">
+            <button type="submit" class="w-full bg-blue-600 shadow-lg shadow-blue-900/20 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition uppercase tracking-widest text-xs">Save Styles Data</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

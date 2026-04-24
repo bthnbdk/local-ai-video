@@ -21,14 +21,33 @@ def run(project_dir: str, config: dict, log_cb=None):
 
     if mode == "library":
         name = style_conf.get("name", "cinematic_dark")
-        lib_path = "styles/library.json"
+        lib_path = "templates/prompts/styles.json"
+        
+        # Default mapping in case of missing items
+        style_data = {
+            "style_name": name,
+            "base_prompt": "",
+            "color_palette": "",
+            "lighting": "",
+            "camera": "",
+            "texture": "",
+            "negative_prompt": "ugly, watermark"
+        }
+        
         if os.path.exists(lib_path):
             with open(lib_path) as f:
                 lib = json.load(f)
                 for s in lib:
-                    if s["style_name"] == name:
-                        style_data = s
+                    if s["id"] == name:
+                        style_data["base_prompt"] = s.get("positive_suffix", "")
+                        style_data["negative_prompt"] = s.get("negative_suffix", "ugly, watermark")
                         break
+
+    # Add Text in Image constraints
+    text_control = config.get("pipeline", {}).get("text_control", "allow")
+    if text_control == "strict_no_text":
+        style_data["base_prompt"] += ", no text, no writing, no watermark, no typography, blank surfaces"
+        style_data["negative_prompt"] += ", text, watermark, signature, font, writing, typography"
                         
     # Seed lock for consistency
     style_data["seed"] = random.randint(0, 10000)

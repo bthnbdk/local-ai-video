@@ -26,11 +26,20 @@ def generate_images_batch(prompts, config, out_dir, log_cb=None):
         prompt_text = p_data["prompt"]
         out_img = os.path.join(out_dir, f"scene_{sid}.png")
         
-        if log_cb: log_cb(f"Requesting cloud generation for scene {sid} via {model}...")
+        ar = config.get("pipeline", {}).get("aspect_ratio", "16:9")
+        if ar == "16:9":
+            size_str = "1024x576"
+        elif ar == "9:16":
+            size_str = "576x1024"
+        else:
+            size_str = "1024x1024"
+            
+        if log_cb: log_cb(f"Requesting cloud generation for scene {sid} via {model} ({size_str})...")
         
         payload = {
             "model": model,
             "prompt": prompt_text,
+            "size": size_str,
             "response_format": "url",
             "output_format": "png"
         }

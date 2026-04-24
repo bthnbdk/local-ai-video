@@ -1,0 +1,26 @@
+[
+    {
+        "id": "cinematic",
+        "name": "Cinematic",
+        "positive_suffix": "cinematic lighting, highly detailed, 8k resolution, masterpiece, professional coloring, dramatic shadows",
+        "negative_suffix": "anime, cartoon, drawing, painting, bad quality, low res, ugly"
+    },
+    {
+        "id": "cyberpunk",
+        "name": "Cyberpunk",
+        "positive_suffix": "cyberpunk style, neon lights, dark moody atmosphere, futuristic, sci-fi, rainy neon streets",
+        "negative_suffix": "natural, bright, historical, medieval, ugly, low res"
+    },
+    {
+        "id": "watercolor",
+        "name": "Watercolor",
+        "positive_suffix": "beautiful watercolor painting, artistic, fluid strokes, pastel colors, expressive",
+        "negative_suffix": "photorealistic, 3d render, poor quality, sketch, messy"
+    },
+    {
+        "id": "3d_render",
+        "name": "3D Render",
+        "positive_suffix": "octane render, unreal engine 5, 3d art, smooth surfaces, perfect lighting, ray tracing",
+        "negative_suffix": "2d, flat, photograph, painting, vector"
+    }
+]

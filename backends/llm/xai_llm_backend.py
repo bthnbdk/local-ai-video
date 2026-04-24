@@ -22,13 +22,15 @@ def generate_text(prompt: str, config: dict) -> str:
         "Use double quotes for strings. Be precise."
     )
 
+    temperature = float(config.get("temperature", 0.7))
+
     payload = {
         "model": model,
         "messages": [
             {"role": "system", "content": system_instruction},
             {"role": "user", "content": prompt}
         ],
-        "temperature": 0.7,
+        "temperature": temperature,
         "response_format": {"type": "json_object"}
     }
     

@@ -13,6 +13,8 @@ def generate_text(prompt: str, config: dict) -> str:
         "Use double quotes for strings. Be precise."
     )
     
+    temperature = float(config.get("temperature", 0.7))
+    
     def attempt_gen():
         try:
             try:
@@ -29,7 +31,7 @@ def generate_text(prompt: str, config: dict) -> str:
                 config=types.GenerateContentConfig(
                     system_instruction=system_instruction,
                     response_mime_type="application/json",
-                    temperature=0.7,
+                    temperature=temperature,
                 ),
             )
             return response.text
@@ -45,7 +47,7 @@ def generate_text(prompt: str, config: dict) -> str:
                 prompt,
                 generation_config=genai_old.types.GenerationConfig(
                     response_mime_type="application/json",
-                    temperature=0.7,
+                    temperature=temperature,
                 )
             )
             return response.text

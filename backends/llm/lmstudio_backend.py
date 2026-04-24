@@ -27,7 +27,7 @@ def generate_text(prompt: str, config: dict) -> str:
             {"role": "system", "content": system_instruction},
             {"role": "user", "content": prompt}
         ], 
-        "temperature": 0.7
+        "temperature": float(config.get("temperature", 0.7))
     }
     
     try:

@@ -19,19 +19,51 @@
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Visual Style</label>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Aspect Ratio</label>
                         <div class="relative">
-                            <select name="style" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">
-                                <option value="cinematic_dark">Cinematic Dark</option>
-                                <option value="anime_pastel">Anime Pastel</option>
-                                <option value="watercolor_soft">Watercolor Soft</option>
-                                <option value="pixel_art_8bit">8-Bit Pixel Art</option>
-                                <option value="documentary_neutral">Documentary / Realistic</option>
+                            <select name="aspect_ratio" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">
+                                <option value="16:9">Horizontal (16:9 - YouTube)</option>
+                                <option value="9:16">Vertical (9:16 - TikTok/Shorts)</option>
+                                <option value="1:1">Square (1:1 - Insta)</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                             </div>
                         </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Story Profile</label>
+                        <div class="relative">
+                            <select name="story_profile" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">
+                                <option value="youtube">YouTube (Detailed, slow arcs)</option>
+                                <option value="tiktok">TikTok (Fast pacing, hooks)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                        <a href="/prompts" target="_blank" class="text-[10px] text-blue-500 hover:underline mt-2 inline-block">Edit Profiles &rarr;</a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Visual Style</label>
+                        <div class="relative">
+                            <select name="style" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">
+                                {% if styles %}
+                                    {% for style in styles %}
+                                        <option value="{{ style.id }}">{{ style.name }}</option>
+                                    {% endfor %}
+                                {% else %}
+                                    <option value="cinematic_dark">Cinematic Default</option>
+                                {% endif %}
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                        <a href="/settings/styles" target="_blank" class="text-[10px] text-blue-500 hover:underline mt-2 inline-block">Manage Styles &rarr;</a>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">LLM Provider</label>
@@ -187,6 +219,63 @@
                     <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Bring Your Own Audio (BYOA) Bypass</label>
                     <input type="text" name="music_file" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-emerald-100 placeholder-zinc-700 focus:outline-none focus:border-emerald-500 hover:border-zinc-700 transition-colors" placeholder="/path/to/custom/audio.wav (Leaves AI Generator Idle)">
                 </div>
+
+                <div class="border border-zinc-800 rounded-2xl p-4 mt-6">
+                    <details class="group">
+                        <summary class="flex justify-between items-center font-bold cursor-pointer list-none">
+                            <span class="text-sm text-zinc-300">Advanced Director Settings</span>
+                            <span class="transition group-open:rotate-180">
+                                <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                            </span>
+                        </summary>
+                        <div class="text-zinc-400 mt-4 space-y-4">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Text in Image</label>
+                                    <select name="text_control" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2 px-3 text-white appearance-none focus:outline-none focus:border-blue-500 text-sm">
+                                        <option value="allow">Allow Text</option>
+                                        <option value="strict_no_text">Strictly No Text</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Transition Style</label>
+                                    <select name="transition" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2 px-3 text-white appearance-none focus:outline-none focus:border-blue-500 text-sm">
+                                        <option value="crossfade">Crossfade (Smooth)</option>
+                                        <option value="hard_cut">Hard Cut</option>
+                                        <option value="dip_to_black">Dip to Black</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Video FPS</label>
+                                    <select name="fps" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2 px-3 text-white appearance-none focus:outline-none focus:border-blue-500 text-sm">
+                                        <option value="24">24 FPS (Cinematic)</option>
+                                        <option value="30" selected>30 FPS (Standard)</option>
+                                        <option value="60">60 FPS (Smooth)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">LLM Creativity (0.1 - 1.0)</label>
+                                    <div class="flex items-center gap-4">
+                                        <input type="range" name="llm_temperature" min="0.1" max="1.0" step="0.1" value="0.7" class="w-full accent-blue-500" oninput="this.nextElementSibling.innerText = this.value">
+                                        <span class="text-sm font-bold w-6 text-center text-white">0.7</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" name="subtitles" class="w-4 h-4 bg-zinc-950 border-zinc-800 rounded text-blue-500 focus:ring-blue-500">
+                                    <span class="text-sm font-bold text-white">Burn-in Subtitles (Yellow/Bold)</span>
+                                </label>
+                            </div>
+
+                        </div>
+                    </details>
+                </div>
                 <div id="error_box" class="hidden bg-red-900/20 border border-red-800 text-red-400 text-sm font-bold p-4 rounded-xl mb-6"></div>
                 <div class="pt-6">
                     <button type="submit" class="w-full bg-blue-600 shadow-lg shadow-blue-900/20 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition uppercase tracking-widest text-xs">Generate Video Pipeline</button>
@@ -281,18 +370,33 @@ function calculateCost() {
         totalPerScene += parseFloat(upscaleModel.options[upscaleModel.selectedIndex].getAttribute('data-price')) || 0;
     }
     
+    const text = topicArea.value.trim();
+    const wordCount = text ? text.split(/\s+/).length : 0;
+    const estScenes = Math.max(1, Math.ceil(wordCount / 15));
+    
+    let totalCost = estScenes * totalPerScene;
+    
+    const llmProvider = document.querySelector('select[name="llm_provider"]').value;
+    if (llmProvider === "xai_llm") {
+        showCost = true;
+        // ~1.5 tokens per word, $0.20 per 1M tokens
+        // Assume output is scenes * 50 words
+        const totalWords = wordCount + (estScenes * 50);
+        totalCost += (totalWords * 1.5 / 1000000) * 0.20;
+    }
+    
+    if (ttsProvider.value === "cloud") {
+        showCost = true;
+        // Assume $0.015 per 1000 characters
+        const estChars = (estScenes * 50) * 5;
+        totalCost += (estChars / 1000) * 0.015;
+    }
+    
     if (!showCost) {
         costEstimator.classList.add('hidden');
         return;
     }
     costEstimator.classList.remove('hidden');
-    
-    // Estimate scenes: ~1 scene per 15 words
-    const text = topicArea.value.trim();
-    const wordCount = text ? text.split(/\s+/).length : 0;
-    const estScenes = Math.max(1, Math.ceil(wordCount / 15));
-    
-    const totalCost = estScenes * totalPerScene;
     
     estScenesSpan.textContent = estScenes;
     estCostSpan.textContent = `$${totalCost.toFixed(4)}`;
@@ -319,7 +423,7 @@ ttsProvider.addEventListener('change', (e) => {
     });
 });
 
-[imageModel, bgModel, upscaleModel].forEach(el => el.addEventListener('change', calculateCost));
+[imageModel, bgModel, upscaleModel, ttsProvider, document.querySelector('select[name="llm_provider"]')].forEach(el => el.addEventListener('change', calculateCost));
 topicArea.addEventListener('input', calculateCost);
 </script>
 {% endblock %}
