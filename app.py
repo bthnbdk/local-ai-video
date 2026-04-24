@@ -122,6 +122,9 @@ def create_project():
                 "preview_mode": data.get("preview_mode") == "on",
                 "aspect_ratio": data.get("aspect_ratio", "16:9"),
                 "story_profile": data.get("story_profile", "youtube"),
+                "content_type": data.get("content_type", "short"),
+                "target_duration": int(data.get("target_duration", 60)),
+                "pacing": data.get("pacing", "fast"),
                 "music_genre": data.get("music_genre", ""),
                 "music_mode": "local" if data.get("music_file", "").strip() else "generated",
                 "music_file": data.get("music_file", "").strip(),
@@ -132,6 +135,41 @@ def create_project():
             }
         }
         sm = StateManager(project_id)
+        
+        # Check diffing logic for resumability
+        old_config = sm.state.get("config", {})
+        if old_config:
+            old_pipe = old_config.get("pipeline", {})
+            new_pipe = config.get("pipeline", {})
+            
+            # If fundamental stuff changed, we invalidate story/tts
+            if (old_config.get("topic") != config.get("topic") or 
+                old_pipe.get("content_type") != new_pipe.get("content_type") or 
+                old_pipe.get("target_duration") != new_pipe.get("target_duration") or 
+                old_pipe.get("pacing") != new_pipe.get("pacing") or
+                old_config.get("llm") != config.get("llm") or
+                old_pipe.get("story_profile") != new_pipe.get("story_profile")):
+                sm.invalidate_dependents("story")
+            
+            # If only aspects or styles changed
+            elif (old_config.get("style", {}).get("name") != config.get("style", {}).get("name") or 
+                  old_pipe.get("text_control") != new_pipe.get("text_control") or 
+                  old_config.get("image") != config.get("image")):
+                sm.invalidate_dependents("style")
+            
+            # If TTS changed
+            elif old_config.get("tts") != config.get("tts"):
+                sm.invalidate_dependents("tts")
+            
+            # If ONLY final wrapper stuff changed
+            elif (old_pipe.get("music_genre") != new_pipe.get("music_genre") or 
+                  old_pipe.get("music_file") != new_pipe.get("music_file") or 
+                  old_pipe.get("fps") != new_pipe.get("fps") or 
+                  old_pipe.get("transition") != new_pipe.get("transition") or 
+                  old_pipe.get("subtitles") != new_pipe.get("subtitles")):
+                sm.invalidate_dependents("music")
+                sm.invalidate_dependents("final_video")
+
         sm.write_config(config)
         
         # Start pipeline thread

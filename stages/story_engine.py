@@ -46,10 +46,27 @@ def run(project_dir: str, config: dict, log_cb=None):
     llm_backend = config.get("llm", {}).get("backend", "local")
     
     story_profile = config.get("pipeline", {}).get("story_profile", "youtube")
+    content_type = config.get("pipeline", {}).get("content_type", "short")
+    target_duration = config.get("pipeline", {}).get("target_duration", 60)
+    pacing = config.get("pipeline", {}).get("pacing", "fast")
+    
+    target_words = int((target_duration / 60.0) * 140) # ~ 140 words per minute of speech
+    pacing_desc = "short, fast-paced scenes" if pacing == "fast" else "longer, descriptive scenes" if pacing == "relaxed" else "documentary rhythm"
+    
     prof_path = os.path.join("templates", "prompts", f"{story_profile}_master.txt")
     profile_rules = ""
     if os.path.exists(prof_path):
         with open(prof_path) as f: profile_rules = f.read() + "\n\n"
+        
+    hook_rule = "You MUST include a strong, engaging hook in the first 3 seconds to immediately capture attention." if content_type == "short" else ""
+    
+    duration_rules = f"""
+TIME & PACING GUIDELINES:
+- Target Duration: ~{target_duration} seconds.
+- Target Word Count: ~{target_words} words across the entire script.
+- Pacing: {pacing_desc}.
+{hook_rule}
+"""
     
     grok_rules = ""
     if tts_backend == "xai" or llm_backend == "xai_llm":
@@ -62,7 +79,7 @@ Use these tags frequently to make the narration sound expressive and human.
 
 Think step-by-step about the visual flow before outputting the final JSON. Ensure the 'mood' and 'emotion' tags perfectly match the narrative for Grok TTS integration.
 """
-    prompt = profile_rules + grok_rules + STRICT_PROMPT.format(
+    prompt = profile_rules + duration_rules + grok_rules + STRICT_PROMPT.format(
         schema=ScriptJSON.model_json_schema(),
         topic=topic,
         scenes_count=scenes_count
