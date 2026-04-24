@@ -1,6 +1,5 @@
 import os
 import json
-import urllib.request
 import time
 import requests
 
@@ -18,7 +17,8 @@ def generate_images_batch(prompts, config, out_dir, log_cb=None):
     url = "https://api.imagerouter.io/v1/openai/images/generations"
     headers = {
         "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
     for p_data in prompts:
@@ -31,27 +31,31 @@ def generate_images_batch(prompts, config, out_dir, log_cb=None):
         payload = {
             "model": model,
             "prompt": prompt_text,
-            "n": 1,
-            "size": "1024x1024",
-            "response_format": "url"
+            "response_format": "url",
+            "output_format": "png"
         }
         
         try:
-            req = urllib.request.Request(url, data=json.dumps(payload).encode(), headers=headers)
-            with urllib.request.urlopen(req, timeout=120) as r:
-                res_data = json.loads(r.read().decode())
+            resp = requests.post(url, headers=headers, json=payload, timeout=120)
+            if resp.status_code != 200:
+                err_body = resp.text
+                if "Balance" in err_body or "exhausted" in err_body.lower() or "credits" in err_body.lower():
+                    raise RuntimeError("API Credits exhausted. Please refill or switch to Local Generation.")
+                raise RuntimeError(f"ImageRouter API Error: {resp.status_code} - {err_body}")
                 
+            res_data = resp.json()
             img_url = res_data["data"][0]["url"]
             
             # Download the image
             if log_cb: log_cb(f"Downloading image for scene {sid}...")
-            urllib.request.urlretrieve(img_url, out_img)
+            # We use requests to get image too
+            img_resp = requests.get(img_url, headers={"User-Agent": headers["User-Agent"]}, timeout=60)
+            if img_resp.status_code == 200:
+                with open(out_img, 'wb') as f:
+                    f.write(img_resp.content)
+            else:
+                raise RuntimeError(f"Failed to download image: {img_resp.status_code} - {img_resp.text}")
             
-        except urllib.error.HTTPError as e:
-            err_body = e.read().decode()
-            if "Balance" in err_body or "exhausted" in err_body.lower() or "credits" in err_body.lower():
-                raise RuntimeError("API Credits exhausted. Please refill or switch to Local Generation.")
-            raise RuntimeError(f"ImageRouter API Error: {e.code} - {err_body}")
         except Exception as e:
             raise RuntimeError(f"Failed to generate cloud image: {str(e)}")
             
@@ -63,12 +67,17 @@ def process_image_edit(img_path, output_path, model_name, log_cb=None):
     api_key = get_api_key()
     url = "https://api.imagerouter.io/v1/openai/images/edits"
     
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+
     if log_cb:
         log_cb(f"Sending to Cloud API ({model_name})...")
         
     with open(img_path, 'rb') as f:
         files = {
-            'image': ('image.png', f, 'image/png')
+            'image[]': ('image.png', f, 'image/png')
         }
         data = {
             'model': model_name,
@@ -76,7 +85,7 @@ def process_image_edit(img_path, output_path, model_name, log_cb=None):
         }
         
         try:
-            resp = requests.post(url, headers={"Authorization": f"Bearer {api_key}"}, files=files, data=data, timeout=120)
+            resp = requests.post(url, headers=headers, files=files, data=data, timeout=120)
             if resp.status_code != 200:
                 err_body = resp.text
                 if "Balance" in err_body or "exhausted" in err_body.lower() or "credits" in err_body.lower():
@@ -88,7 +97,12 @@ def process_image_edit(img_path, output_path, model_name, log_cb=None):
             
             if log_cb:
                 log_cb("Downloading processed image...")
-            urllib.request.urlretrieve(img_url, output_path)
+            img_resp = requests.get(img_url, headers={"User-Agent": headers["User-Agent"]}, timeout=60)
+            if img_resp.status_code == 200:
+                with open(output_path, 'wb') as out_f:
+                    out_f.write(img_resp.content)
+            else:
+                raise RuntimeError(f"Failed to download image: {img_resp.status_code} - {img_resp.text}")
             
         except Exception as e:
              raise RuntimeError(f"Failed image edit with {model_name}: {str(e)}")

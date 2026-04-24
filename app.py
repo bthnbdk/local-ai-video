@@ -84,15 +84,16 @@ def create_project():
             est_scenes = max(1, math.ceil(word_count / 15))
             needed_credits = est_scenes * total_cost_per_scene
             
-            import urllib.request
+            import requests
             api_key = os.environ.get("IMAGEROUTER_API_KEY", "")
             if not api_key:
                 return jsonify({"error": "IMAGEROUTER_API_KEY environment variable is missing."})
-            req = urllib.request.Request("https://api.imagerouter.io/v1/credits", headers={"Authorization": f"Bearer {api_key}"})
+            
             try:
-                with urllib.request.urlopen(req) as r:
-                    credits_data = json.loads(r.read().decode())
-                    rem_credits = credits_data.get("remaining_credits", 0)
+                resp = requests.get("https://api.imagerouter.io/v1/credits", headers={"Authorization": f"Bearer {api_key}", "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}, timeout=10)
+                if resp.status_code == 200:
+                    credits_data = resp.json()
+                    rem_credits = float(credits_data.get("remaining_credits", 0))
                     if rem_credits < needed_credits:
                         return jsonify({"error": f"Insufficient API Credits (${needed_credits:.3f} needed). Please refill or switch to Local stages."})
             except Exception as e:
