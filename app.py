@@ -181,31 +181,47 @@ def create_project():
         return jsonify({"success": True, "redirect": f"/project/{project_id}/progress"})
         
     styles_path = os.path.join("templates", "prompts", "styles.json")
+    music_styles_path = os.path.join("templates", "prompts", "music_styles.json")
     styles = []
+    music_styles = []
     if os.path.exists(styles_path):
         with open(styles_path, 'r') as f:
             styles = json.load(f)
-    return render_template("create.html", styles=styles)
+    if os.path.exists(music_styles_path):
+        with open(music_styles_path, 'r') as f:
+            music_styles = json.load(f)
+    return render_template("create.html", styles=styles, music_styles=music_styles)
 
 @app.route("/settings/styles", methods=["GET", "POST"])
 def manage_styles():
     styles_path = os.path.join("templates", "prompts", "styles.json")
+    music_styles_path = os.path.join("templates", "prompts", "music_styles.json")
     if request.method == "POST":
-        # Overwrite entire styles.json from submitted textarea
+        # Overwrite entire json from submitted textarea
         styles_json_str = request.form.get("styles_json", "[]")
+        music_styles_json_str = request.form.get("music_styles_json", "[]")
         try:
             styles_data = json.loads(styles_json_str)
             with open(styles_path, "w") as f:
                 json.dump(styles_data, f, indent=4)
-            return render_template("styles.html", success=True, styles_json=json.dumps(styles_data, indent=4))
+                
+            music_styles_data = json.loads(music_styles_json_str)
+            with open(music_styles_path, "w") as f:
+                json.dump(music_styles_data, f, indent=4)
+                
+            return render_template("styles.html", success=True, styles_json=json.dumps(styles_data, indent=4), music_styles_json=json.dumps(music_styles_data, indent=4))
         except Exception as e:
-            return render_template("styles.html", error=str(e), styles_json=styles_json_str)
+            return render_template("styles.html", error=str(e), styles_json=styles_json_str, music_styles_json=music_styles_json_str)
             
     styles_json_str = "[\n]"
+    music_styles_json_str = "[\n]"
     if os.path.exists(styles_path):
         with open(styles_path, 'r') as f:
             styles_json_str = f.read()
-    return render_template("styles.html", styles_json=styles_json_str)
+    if os.path.exists(music_styles_path):
+        with open(music_styles_path, 'r') as f:
+            music_styles_json_str = f.read()
+    return render_template("styles.html", styles_json=styles_json_str, music_styles_json=music_styles_json_str)
 
 @app.route("/prompts", methods=["GET", "POST"])
 def edit_prompts():

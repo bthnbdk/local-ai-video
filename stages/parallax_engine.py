@@ -47,17 +47,18 @@ def run(project_dir: str, config: dict, log_cb=None):
         
         if os.path.exists(fg_img):
             filter_complex = (
-                f"[0:v]format=rgba,scale='{w}*(1+0.05*(n/{frames}))':'{h}*(1+0.05*(n/{frames}))':eval=frame,"
-                f"crop={w}:{h}:(iw-{w})/2:(ih-{h})/2[bg];"
-                f"[1:v]format=rgba,scale='{w}*(1+0.15*(n/{frames}))':'{h}*(1+0.15*(n/{frames}))':eval=frame,"
-                f"crop={w}:{h}:(iw-{w})/2:(ih-{h})/2[fg];"
-                f"[bg][fg]overlay=x=0:y=0:format=rgb,format=yuv420p[rawv]"
+                f"[0:v]zoompan=z='1+0.05*(on/{frames})':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h},format=rgb24[bg];"
+                f"[1:v]split[fg_rgb][fg_alpha_base];"
+                f"[fg_alpha_base]alphaextract[fg_alpha];"
+                f"[fg_rgb]zoompan=z='1+0.15*(on/{frames})':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h}[fg_c];"
+                f"[fg_alpha]zoompan=z='1+0.15*(on/{frames})':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h}[fg_a];"
+                f"[fg_c][fg_a]alphamerge[fg_merged];"
+                f"[bg][fg_merged]overlay=x=0:y=0:format=rgb,format=yuv420p[rawv]"
             )
             inputs = ["-loop", "1", "-i", bg_img, "-loop", "1", "-i", fg_img]
         else:
             filter_complex = (
-                f"[0:v]format=rgb,scale='{w}*(1+0.05*(n/{frames}))':'{h}*(1+0.05*(n/{frames}))':eval=frame,"
-                f"crop={w}:{h}:(iw-{w})/2:(ih-{h})/2,format=yuv420p[rawv]"
+                f"[0:v]zoompan=z='1+0.05*(on/{frames})':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h},format=yuv420p[rawv]"
             )
             inputs = ["-loop", "1", "-i", bg_img]
             

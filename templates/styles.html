@@ -17,11 +17,24 @@
     </div>
     {% endif %}
 
-    <p class="text-sm text-zinc-400 mb-6">Edit the raw JSON below to add, remove, or modify style presets. Each requires an `id`, `name`, `positive_suffix`, and `negative_suffix`.</p>
+    <p class="text-sm text-zinc-400 mb-6">Edit the raw JSON below to add, remove, or modify style presets.</p>
+    <p class="text-xs text-zinc-500 mb-4"><strong>Image Styles:</strong> Requires `id`, `name`, `positive_suffix`, and `negative_suffix`.</p>
+    <p class="text-xs text-zinc-500 mb-6"><strong>Music Styles:</strong> Requires `id`, `name`, and `prompt`.</p>
 
     <form method="POST" class="space-y-6">
-        <div class="h-[500px]">
-            <textarea name="styles_json" class="w-full h-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white font-mono text-sm resize-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">{{ styles_json }}</textarea>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Image Styles (styles.json)</label>
+                <div class="h-[500px]">
+                    <textarea name="styles_json" class="w-full h-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white font-mono text-sm resize-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">{{ styles_json }}</textarea>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-widest text-zinc-500 mb-2">Music Styles (music_styles.json)</label>
+                <div class="h-[500px]">
+                    <textarea name="music_styles_json" class="w-full h-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white font-mono text-sm resize-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">{{ music_styles_json }}</textarea>
+                </div>
+            </div>
         </div>
 
         <div class="pt-6">

@@ -1,3 +1,10 @@
+import sys
+import types
+if 'xformers' not in sys.modules:
+    dummy_xformers = types.ModuleType('xformers')
+    dummy_xformers.ops = None
+    sys.modules['xformers'] = dummy_xformers
+
 import os
 import json
 import numpy as np

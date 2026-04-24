@@ -1,0 +1,22 @@
+[
+    {
+        "id": "cinematic_ambient",
+        "name": "Cinematic Ambient",
+        "prompt": "cinematic ambient, ethereal, slow pad synth, emotional"
+    },
+    {
+        "id": "lofi_chill",
+        "name": "Lo-Fi Chill",
+        "prompt": "lofi hip hop, chill beats, vinyl crackle, relaxed piano"
+    },
+    {
+        "id": "orchestral_horror",
+        "name": "Orchestral Horror",
+        "prompt": "terrifying orchestral horror, piercing strings, loud brass blasts, dark atmospheric"
+    },
+    {
+        "id": "synthwave",
+        "name": "Retro Synthwave",
+        "prompt": "80s synthwave, driving bassline, retro drums, arpeggiated synths"
+    }
+]

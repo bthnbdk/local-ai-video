@@ -46,8 +46,8 @@ def run(project_dir: str, config: dict, log_cb=None):
     # Add Text in Image constraints
     text_control = config.get("pipeline", {}).get("text_control", "allow")
     if text_control == "strict_no_text":
-        style_data["base_prompt"] += ", no text, no writing, no watermark, no typography, blank surfaces"
-        style_data["negative_prompt"] += ", text, watermark, signature, font, writing, typography"
+        style_data["base_prompt"] = "[NO TEXT, NO LETTERS, NO WATERMARK, NO SIGNATURE, BLANK SURFACES] - " + style_data["base_prompt"]
+        style_data["negative_prompt"] = "text, watermark, signature, font, writing, typography, " + style_data["negative_prompt"]
                         
     # Seed lock for consistency
     style_data["seed"] = random.randint(0, 10000)
