@@ -125,6 +125,7 @@ def create_project():
                 "content_type": data.get("content_type", "short"),
                 "target_duration": int(data.get("target_duration", 60)),
                 "pacing": data.get("pacing", "fast"),
+                "motion_source": data.get("motion_source", "local"),
                 "music_genre": data.get("music_genre", ""),
                 "music_mode": "local" if data.get("music_file", "").strip() else "generated",
                 "music_file": data.get("music_file", "").strip(),
@@ -160,6 +161,10 @@ def create_project():
             # If TTS changed
             elif old_config.get("tts") != config.get("tts"):
                 sm.invalidate_dependents("tts")
+                
+            # If Motion source changed
+            elif old_pipe.get("motion_source") != new_pipe.get("motion_source"):
+                sm.invalidate_dependents("parallax")
             
             # If ONLY final wrapper stuff changed
             elif (old_pipe.get("music_genre") != new_pipe.get("music_genre") or 

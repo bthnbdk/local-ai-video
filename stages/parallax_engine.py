@@ -7,9 +7,20 @@ def run(project_dir: str, config: dict, log_cb=None):
     mask_dir = os.path.join(project_dir, "masks")
     scenes_dir = os.path.join(project_dir, "scenes")
     timing_file = os.path.join(project_dir, "timing.json")
+    script_file = os.path.join(project_dir, "script.json")
     os.makedirs(scenes_dir, exist_ok=True)
     
     with open(timing_file) as f: timing = json.load(f)
+    
+    script_data = {}
+    if os.path.exists(script_file):
+        with open(script_file) as f: script_data = json.load(f)
+        
+    def get_scene_prompt(sid):
+        for s in script_data.get("scenes", []):
+            if s.get("id") == sid or f"scene_{s.get('id')}" == sid or str(s.get("id")) == str(sid):
+                return s.get("visual_prompt", "")
+        return ""
     
     ar = config.get("pipeline", {}).get("aspect_ratio", "16:9")
     if ar == "16:9":
@@ -19,7 +30,9 @@ def run(project_dir: str, config: dict, log_cb=None):
     else:
         w, h = 1024, 1024
         
-    if log_cb: log_cb(f"Generating 2.5D parallax video scenes ({w}x{h})...")
+    motion_engine = config.get("pipeline", {}).get("motion_source", "local")
+    
+    if log_cb: log_cb(f"Generating video scenes ({w}x{h}) using {motion_engine} engine...")
     
     fps = config.get("pipeline", {}).get("fps", 30)
     transition = config.get("pipeline", {}).get("transition", "crossfade")
@@ -34,31 +47,38 @@ def run(project_dir: str, config: dict, log_cb=None):
         if not os.path.exists(bg_img):
             continue
             
+        if motion_engine == "cloud":
+            try:
+                from backends.video.imagerouter_video_backend import generate_video
+                prompt = get_scene_prompt(sid)
+                if log_cb: log_cb(f"  -> Cloud AI Video for scene {sid} (prompt: {prompt[:30]}...)")
+                
+                raw_out = out_path + ".raw.mp4"
+                generate_video(prompt, bg_img, raw_out, duration)
+                
+                # Trim to exact duration
+                subprocess.run(["ffmpeg", "-y", "-i", raw_out, "-t", str(duration), "-c", "copy", out_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                if os.path.exists(raw_out):
+                    os.remove(raw_out)
+                continue
+            except Exception as e:
+                if log_cb: log_cb(f"Warning: Cloud video generation failed for {sid}: {e}. Falling back to 2.5D parallax.")
+
         frames = int(duration * fps)
-        
-        # We use a complex filter to scale the sequence frame by frame
-        # to avoid zoompan destroying the alpha channel, and apply to both BG and FG
-        
-        # Background: zoom from 1.0 to 1.05
-        # Foreground: zoom from 1.0 to 1.15
-        
-        # Scale equation: target_width * (1 + (end_zoom - 1) * (n / frames))
-        # We need to crop it back to w, h
         
         if os.path.exists(fg_img):
             filter_complex = (
-                f"[0:v]zoompan=z='1+0.05*(on/{frames})':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h},format=rgb24[bg];"
-                f"[1:v]split[fg_rgb][fg_alpha_base];"
-                f"[fg_alpha_base]alphaextract[fg_alpha];"
-                f"[fg_rgb]zoompan=z='1+0.15*(on/{frames})':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h}[fg_c];"
-                f"[fg_alpha]zoompan=z='1+0.15*(on/{frames})':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h}[fg_a];"
-                f"[fg_c][fg_a]alphamerge[fg_merged];"
-                f"[bg][fg_merged]overlay=x=0:y=0:format=rgb,format=yuv420p[rawv]"
+                f"[0:v]scale=eval=frame:w='iw*(1+0.05*n/{frames})':h='ih*(1+0.05*n/{frames})',"
+                f"crop={w}:{h}:'(iw-ow)/2':'(ih-oh)/2'[bg];"
+                f"[1:v]scale=eval=frame:w='iw*(1+0.15*n/{frames})':h='ih*(1+0.15*n/{frames})',"
+                f"crop={w}:{h}:'(iw-ow)/2':'(ih-oh)/2'[fg];"
+                f"[bg][fg]overlay=x=0:y=0:format=rgb,format=yuv420p[rawv]"
             )
             inputs = ["-loop", "1", "-i", bg_img, "-loop", "1", "-i", fg_img]
         else:
             filter_complex = (
-                f"[0:v]zoompan=z='1+0.05*(on/{frames})':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h},format=yuv420p[rawv]"
+                f"[0:v]scale=eval=frame:w='iw*(1+0.05*n/{frames})':h='ih*(1+0.05*n/{frames})',"
+                f"crop={w}:{h}:'(iw-ow)/2':'(ih-oh)/2',format=yuv420p[rawv]"
             )
             inputs = ["-loop", "1", "-i", bg_img]
             
@@ -88,3 +108,4 @@ def run(project_dir: str, config: dict, log_cb=None):
             with open(out_path, "w") as empty: empty.write("")
             
     return True
+

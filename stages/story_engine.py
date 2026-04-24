@@ -65,6 +65,7 @@ TIME & PACING GUIDELINES:
 - Target Duration: ~{target_duration} seconds.
 - Target Word Count: ~{target_words} words across the entire script.
 - Pacing: {pacing_desc}.
+- IMPORTANT: Keep the narration/dialogue for each individual scene extremely short and punchy (maximum 15-20 words per scene). No scene should take longer than 10 seconds to read aloud.
 {hook_rule}
 """
     

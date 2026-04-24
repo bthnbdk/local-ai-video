@@ -227,6 +227,20 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Motion Engine -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Motion Engine</label>
+                        <div class="relative">
+                            <select id="motion_source" name="motion_source" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-orange-500 hover:border-zinc-700 transition-colors">
+                                <option value="local" data-price="0.0">Smooth 2.5D Parallax (Local)</option>
+                                <option value="cloud" data-price="0.07">AI Video Generation (Cloud - Seedance-1)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div id="cost_estimator" class="hidden text-sm font-bold text-cyan-400 p-4 border border-cyan-900/30 bg-cyan-900/10 rounded-xl">
@@ -388,6 +402,8 @@ const upscaleSource = document.getElementById('upscale_source');
 const dUpscaleModel = document.getElementById('cloud_upscale_model_container');
 const upscaleModel = document.getElementById('upscale_model');
 
+const motionSource = document.getElementById('motion_source');
+
 const topicArea = document.querySelector('textarea[name="topic"]');
 const costEstimator = document.getElementById('cost_estimator');
 const estCostSpan = document.getElementById('estimated_cost');
@@ -444,6 +460,14 @@ function calculateCost() {
     }
     
     let totalCost = estScenes * totalPerScene;
+
+    if (motionSource.value === 'cloud') {
+        showCost = true;
+        // Estimate average 5 seconds per scene, or dynamically based on durationSecs
+        const avgDuration = Math.max(5, durationSecs / estScenes);
+        // $0.014 per second -> 0.07 for 5s
+        totalCost += estScenes * avgDuration * 0.014;
+    }
     
     const llmProvider = document.querySelector('select[name="llm_provider"]').value;
     if (llmProvider === "xai_llm") {
@@ -492,7 +516,7 @@ ttsProvider.addEventListener('change', (e) => {
     });
 });
 
-[imageModel, bgModel, upscaleModel, ttsProvider, document.querySelector('select[name="llm_provider"]'), document.querySelector('select[name="content_type"]'), document.querySelector('input[name="target_duration"]'), document.querySelector('select[name="pacing"]')].forEach(el => el.addEventListener('change', calculateCost));
+[imageModel, bgModel, upscaleModel, ttsProvider, motionSource, document.querySelector('select[name="llm_provider"]'), document.querySelector('select[name="content_type"]'), document.querySelector('input[name="target_duration"]'), document.querySelector('select[name="pacing"]')].forEach(el => el.addEventListener('change', calculateCost));
 topicArea.addEventListener('input', calculateCost);
 </script>
 {% endblock %}
