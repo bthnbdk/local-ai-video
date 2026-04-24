@@ -42,7 +42,18 @@ def run(project_dir: str, config: dict, log_cb=None):
     scenes_count = max(3, min(12, len(topic.split()) // 5))
     if scenes_count < 3: scenes_count = 3
     
-    prompt = STRICT_PROMPT.format(
+    tts_backend = config.get("tts", {}).get("backend", "local")
+    
+    grok_rules = ""
+    if tts_backend == "xai":
+        grok_rules = """
+SPEECH TAG GUIDE (Grok expressive TTS):
+You MUST use these tags naturally in the 'text' field to add emotion and timing:
+- Inline marks: [pause], [long-pause], [laugh], [chuckle], [sigh], [breath], [cry]
+- Wrapping wrappers: <whisper>content</whisper>, <loud>content</loud>, <slow>content</slow>, <fast>content</fast>, <singing>content</singing>, <emphasis>content</emphasis>
+Use these tags frequently to make the narration sound expressive and human.
+"""
+    prompt = grok_rules + STRICT_PROMPT.format(
         schema=ScriptJSON.model_json_schema(),
         topic=topic,
         scenes_count=scenes_count

@@ -2,13 +2,18 @@ import os
 import json
 import urllib.request
 import time
+import requests
 
-def generate_images_batch(prompts, config, out_dir, log_cb=None):
+def get_api_key():
     api_key = os.environ.get("IMAGEROUTER_API_KEY")
     if not api_key:
         raise ValueError("IMAGEROUTER_API_KEY environment variable is missing. Please set it to use Cloud API for images.")
+    return api_key
+
+def generate_images_batch(prompts, config, out_dir, log_cb=None):
+    api_key = get_api_key()
         
-    model = config.get("image", {}).get("model", "flux/2-klein")
+    model = config.get("image", {}).get("model", "black-forest-labs/FLUX-2-klein-9b")
     
     url = "https://api.imagerouter.io/v1/openai/images/generations"
     headers = {
@@ -53,3 +58,45 @@ def generate_images_batch(prompts, config, out_dir, log_cb=None):
         time.sleep(1) # Small delay to respect rate limits
         
     return True
+
+def process_image_edit(img_path, output_path, model_name, log_cb=None):
+    api_key = get_api_key()
+    url = "https://api.imagerouter.io/v1/openai/images/edits"
+    
+    if log_cb:
+        log_cb(f"Sending to Cloud API ({model_name})...")
+        
+    with open(img_path, 'rb') as f:
+        files = {
+            'image': ('image.png', f, 'image/png')
+        }
+        data = {
+            'model': model_name,
+            'response_format': 'url'
+        }
+        
+        try:
+            resp = requests.post(url, headers={"Authorization": f"Bearer {api_key}"}, files=files, data=data, timeout=120)
+            if resp.status_code != 200:
+                err_body = resp.text
+                if "Balance" in err_body or "exhausted" in err_body.lower() or "credits" in err_body.lower():
+                    raise RuntimeError("API Credits exhausted. Please refill or switch to Local Generation.")
+                raise RuntimeError(f"ImageRouter API Edit Error: {resp.status_code} - {err_body}")
+                
+            res_data = resp.json()
+            img_url = res_data["data"][0]["url"]
+            
+            if log_cb:
+                log_cb("Downloading processed image...")
+            urllib.request.urlretrieve(img_url, output_path)
+            
+        except Exception as e:
+             raise RuntimeError(f"Failed image edit with {model_name}: {str(e)}")
+
+def remove_bg_cloud(img_path, output_path, config, log_cb=None):
+    model = config.get("image", {}).get("bg_model", "bria/remove-background")
+    process_image_edit(img_path, output_path, model, log_cb)
+    
+def upscale_cloud(img_path, output_path, config, log_cb=None):
+    model = config.get("image", {}).get("upscale_model", "prunaai/P-Image-Upscale")
+    process_image_edit(img_path, output_path, model, log_cb)

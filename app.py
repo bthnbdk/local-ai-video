@@ -46,17 +46,68 @@ def create_project():
             llm_config = {"backend": "lmstudio", "model": "local-model", "host": "http://localhost:1234"}
             
         img_source = data.get("image_source", "local")
+        image_config = {"backend": "auto"}
         if img_source == "cloud":
-            image_config = {"backend": "imagerouter", "model": data.get("image_model", "flux/2-klein")}
+            image_config["backend"] = "imagerouter"
+            image_config["model"] = data.get("image_model", "black-forest-labs/FLUX-2-klein-9b")
+            
+        bg_source = data.get("bg_source", "local")
+        image_config["bg_backend"] = "imagerouter" if bg_source == "cloud" else "local"
+        image_config["bg_model"] = data.get("bg_model", "bria/remove-background")
+        
+        upscale_source = data.get("upscale_source", "local")
+        image_config["upscale_backend"] = "imagerouter" if upscale_source == "cloud" else "local"
+        image_config["upscale_model"] = data.get("upscale_model", "prunaai/P-Image-Upscale")
+        
+        # Credit Check
+        total_cost_per_scene = 0
+        prices_map = {
+            "black-forest-labs/FLUX-2-klein-9b": 0.0008,
+            "flux/1.1-pro": 0.04,
+            "flux/2-klein": 0.00,
+            "midjourney": 0.0848,
+            "recraft/v4": 0.04,
+            "dalle3": 0.04,
+            "bria/remove-background": 0.0006,
+            "prunaai/P-Image-Upscale": 0.005,
+        }
+        if img_source == "cloud": total_cost_per_scene += prices_map.get(image_config["model"], 0)
+        if bg_source == "cloud": total_cost_per_scene += prices_map.get(image_config["bg_model"], 0)
+        if upscale_source == "cloud": total_cost_per_scene += prices_map.get(image_config["upscale_model"], 0)
+
+        if total_cost_per_scene > 0:
+            import math
+            text = data.get("topic", "").strip()
+            word_count = len(text.split())
+            est_scenes = max(1, math.ceil(word_count / 15))
+            needed_credits = est_scenes * total_cost_per_scene
+            
+            import urllib.request
+            api_key = os.environ.get("IMAGEROUTER_API_KEY", "")
+            if not api_key:
+                return jsonify({"error": "IMAGEROUTER_API_KEY environment variable is missing."})
+            req = urllib.request.Request("https://api.imagerouter.io/v1/credits", headers={"Authorization": f"Bearer {api_key}"})
+            try:
+                with urllib.request.urlopen(req) as r:
+                    credits_data = json.loads(r.read().decode())
+                    rem_credits = credits_data.get("remaining_credits", 0)
+                    if rem_credits < needed_credits:
+                        return jsonify({"error": f"Insufficient API Credits (${needed_credits:.3f} needed). Please refill or switch to Local stages."})
+            except Exception as e:
+                pass
+            
+        tts_source = data.get("tts_provider", "local")
+        if tts_source == "cloud":
+            tts_config = {"backend": "xai", "voice_id": data.get("tts_voice", "eve")}
         else:
-            image_config = {"backend": "auto"}
+            tts_config = {"backend": "kokoro", "voice_id": "af_heart"}
             
         config = {
             "project_name": project_id,
             "topic": data.get("topic"),
             "style": {"mode": "library", "name": data.get("style", "cinematic_dark"), "freetext": ""},
             "llm": llm_config,
-            "tts": {"backend": "kokoro"},
+            "tts": tts_config,
             "image": image_config,
             "pipeline": {
                 "preview_mode": data.get("preview_mode") == "on",

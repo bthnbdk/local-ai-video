@@ -49,11 +49,46 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                     <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Image Generation Source</label>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">TTS Provider</label>
+                        <div class="relative">
+                            <select id="tts_provider" name="tts_provider" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">
+                                <option value="local">Local (Kokoro)</option>
+                                <option value="cloud">Cloud (x.ai Grok)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="cloud_tts_voice_container" class="hidden">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Grok Voice</label>
+                        <div class="relative">
+                            <select id="tts_voice" name="tts_voice" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-blue-500 hover:border-zinc-700 transition-colors">
+                                <option value="eve">Eve (Energetic, upbeat)</option>
+                                <option value="ara">Ara (Warm, conversational)</option>
+                                <option value="rex">Rex (Confident, professional)</option>
+                                <option value="sal">Sal (Smooth, versatile)</option>
+                                <option value="leo">Leo (Authoritative, commanding)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tts_hint_box" class="hidden text-sm font-bold text-blue-400 p-4 border border-blue-900/30 bg-blue-900/10 rounded-xl mb-4">
+                    Speech Style: Grok is active. You can prompt the AI to include laughing, whispering, or singing in the video.
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <!-- Image Generation Source -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Generation Source</label>
                         <div class="relative">
                             <select id="image_source" name="image_source" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-cyan-500 hover:border-zinc-700 transition-colors">
                                 <option value="local">Local (MFLUX)</option>
-                                <option value="cloud">Cloud API (ImageRouter)</option>
+                                <option value="cloud">Cloud (ImageRouter)</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -61,11 +96,11 @@
                         </div>
                     </div>
                     <div id="cloud_image_model_container" class="hidden">
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Cloud Image Model</label>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Cloud Model</label>
                         <div class="relative">
                             <select id="image_model" name="image_model" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-cyan-500 hover:border-zinc-700 transition-colors">
+                                <option value="black-forest-labs/FLUX-2-klein-9b" data-price="0.0008">FLUX 2 Klein 9b ($0.0008)</option>
                                 <option value="flux/1.1-pro" data-price="0.04">FLUX 1.1 Pro ($0.04)</option>
-                                <option value="flux/2-klein" data-price="0.00">FLUX 2 Klein 4b (Free)</option>
                                 <option value="midjourney" data-price="0.0848">Midjourney ($0.0848)</option>
                                 <option value="recraft/v4" data-price="0.04">Recraft V4 ($0.04)</option>
                                 <option value="dalle3" data-price="0.04">Dall-E 3 ($0.04)</option>
@@ -75,10 +110,60 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Background Removal Default -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">BG Removal Source</label>
+                        <div class="relative">
+                            <select id="bg_source" name="bg_source" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-purple-500 hover:border-zinc-700 transition-colors">
+                                <option value="local">Local (RemBG)</option>
+                                <option value="cloud">Cloud (ImageRouter Bria)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="cloud_bg_model_container" class="hidden">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">BG Model</label>
+                        <div class="relative">
+                            <select id="bg_model" name="bg_model" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-purple-500 hover:border-zinc-700 transition-colors">
+                                <option value="bria/remove-background" data-price="0.0006">Bria Remove BG ($0.0006)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Upscale Default -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Upscale Source</label>
+                        <div class="relative">
+                            <select id="upscale_source" name="upscale_source" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-pink-500 hover:border-zinc-700 transition-colors">
+                                <option value="local">Local (RealESRGAN)</option>
+                                <option value="cloud">Cloud (ImageRouter PrunaAI)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="cloud_upscale_model_container" class="hidden">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Upscale Model</label>
+                        <div class="relative">
+                            <select id="upscale_model" name="upscale_model" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-pink-500 hover:border-zinc-700 transition-colors">
+                                <option value="prunaai/P-Image-Upscale" data-price="0.005">PrunaAI Upscale ($0.005)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div id="cost_estimator" class="hidden text-sm font-bold text-cyan-400 p-4 border border-cyan-900/30 bg-cyan-900/10 rounded-xl">
-                    Estimated Cost: <span id="estimated_cost">$0.00</span> <span class="text-xs text-zinc-500 font-normal ml-2">(~<span id="estimated_scenes">0</span> scenes)</span>
+                    Estimated Project Cost: <span id="estimated_cost">$0.00</span> <span class="text-xs text-zinc-500 font-normal ml-2">(~<span id="estimated_scenes">0</span> scenes)</span>
                 </div>
                 
                 <div class="pt-2">
@@ -101,6 +186,7 @@
                     <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Bring Your Own Audio (BYOA) Bypass</label>
                     <input type="text" name="music_file" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-emerald-100 placeholder-zinc-700 focus:outline-none focus:border-emerald-500 hover:border-zinc-700 transition-colors" placeholder="/path/to/custom/audio.wav (Leaves AI Generator Idle)">
                 </div>
+                <div id="error_box" class="hidden bg-red-900/20 border border-red-800 text-red-400 text-sm font-bold p-4 rounded-xl mb-6"></div>
                 <div class="pt-6">
                     <button type="submit" class="w-full bg-blue-600 shadow-lg shadow-blue-900/20 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition uppercase tracking-widest text-xs">Generate Video Pipeline</button>
                 </div>
@@ -138,22 +224,63 @@
 <script>
 document.getElementById('createForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const errBox = document.getElementById('error_box');
+    errBox.classList.add('hidden');
+    errBox.textContent = '';
+    
+    btn.disabled = true;
+    btn.textContent = 'Checking Cloud Credits...';
+    
     const formData = new FormData(e.target);
     const res = await fetch('/project/new', { method: 'POST', body: formData });
     const data = await res.json();
-    if (data.redirect) window.location.href = data.redirect;
+    
+    if (data.error) {
+        errBox.textContent = data.error;
+        errBox.classList.remove('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Generate Video Pipeline';
+    } else if (data.redirect) {
+        window.location.href = data.redirect;
+    }
 });
 
 const imageSource = document.getElementById('image_source');
 const dImageModel = document.getElementById('cloud_image_model_container');
 const imageModel = document.getElementById('image_model');
+
+const bgSource = document.getElementById('bg_source');
+const dBgModel = document.getElementById('cloud_bg_model_container');
+const bgModel = document.getElementById('bg_model');
+
+const upscaleSource = document.getElementById('upscale_source');
+const dUpscaleModel = document.getElementById('cloud_upscale_model_container');
+const upscaleModel = document.getElementById('upscale_model');
+
 const topicArea = document.querySelector('textarea[name="topic"]');
 const costEstimator = document.getElementById('cost_estimator');
 const estCostSpan = document.getElementById('estimated_cost');
 const estScenesSpan = document.getElementById('estimated_scenes');
 
 function calculateCost() {
-    if (imageSource.value !== 'cloud') {
+    let showCost = false;
+    let totalPerScene = 0;
+    
+    if (imageSource.value === 'cloud') {
+        showCost = true;
+        totalPerScene += parseFloat(imageModel.options[imageModel.selectedIndex].getAttribute('data-price')) || 0;
+    }
+    if (bgSource.value === 'cloud') {
+        showCost = true;
+        totalPerScene += parseFloat(bgModel.options[bgModel.selectedIndex].getAttribute('data-price')) || 0;
+    }
+    if (upscaleSource.value === 'cloud') {
+        showCost = true;
+        totalPerScene += parseFloat(upscaleModel.options[upscaleModel.selectedIndex].getAttribute('data-price')) || 0;
+    }
+    
+    if (!showCost) {
         costEstimator.classList.add('hidden');
         return;
     }
@@ -164,26 +291,34 @@ function calculateCost() {
     const wordCount = text ? text.split(/\s+/).length : 0;
     const estScenes = Math.max(1, Math.ceil(wordCount / 15));
     
-    // Get cost per image
-    const selectedOption = imageModel.options[imageModel.selectedIndex];
-    const pricePerImage = parseFloat(selectedOption.getAttribute('data-price')) || 0;
-    
-    const totalCost = estScenes * pricePerImage;
+    const totalCost = estScenes * totalPerScene;
     
     estScenesSpan.textContent = estScenes;
-    estCostSpan.textContent = `$${totalCost.toFixed(2)}`;
+    estCostSpan.textContent = `$${totalCost.toFixed(4)}`;
 }
 
-imageSource.addEventListener('change', () => {
-    if (imageSource.value === 'cloud') {
-        dImageModel.classList.remove('hidden');
-    } else {
-        dImageModel.classList.add('hidden');
-    }
-    calculateCost();
+
+const ttsProvider = document.getElementById('tts_provider');
+const dttsVoice = document.getElementById('cloud_tts_voice_container');
+const ttsHintBox = document.getElementById('tts_hint_box');
+
+ttsProvider.addEventListener('change', (e) => {
+    const isCloud = e.target.value === 'cloud';
+    dttsVoice.classList.toggle('hidden', !isCloud);
+    ttsHintBox.classList.toggle('hidden', !isCloud);
 });
 
-imageModel.addEventListener('change', calculateCost);
+[imageSource, bgSource, upscaleSource].forEach((el, idx) => {
+    el.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (idx === 0) dImageModel.classList.toggle('hidden', val !== 'cloud');
+        if (idx === 1) dBgModel.classList.toggle('hidden', val !== 'cloud');
+        if (idx === 2) dUpscaleModel.classList.toggle('hidden', val !== 'cloud');
+        calculateCost();
+    });
+});
+
+[imageModel, bgModel, upscaleModel].forEach(el => el.addEventListener('change', calculateCost));
 topicArea.addEventListener('input', calculateCost);
 </script>
 {% endblock %}

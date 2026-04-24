@@ -23,12 +23,12 @@ def run(project_dir: str, config: dict, log_cb=None):
         result = whisper.transcribe(model, audio, language="en")
         
         words = []
-        for segment in result["segments"]:
-            for word in segment["words"]:
+        for segment in result.get("segments", []):
+            for word in segment.get("words", []):
                 words.append({
                     "word": word["text"],
-                    "start": word["start"],
-                    "end": word["end"]
+                    "start": word.get("start", 0.0),
+                    "end": word.get("end", 0.0)
                 })
         
         with open(out_path, "w") as f:
