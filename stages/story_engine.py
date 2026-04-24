@@ -53,6 +53,8 @@ You MUST use these tags naturally in the 'text' field to add emotion and timing:
 - Inline marks: [pause], [long-pause], [laugh], [chuckle], [sigh], [breath], [cry]
 - Wrapping wrappers: <whisper>content</whisper>, <loud>content</loud>, <slow>content</slow>, <fast>content</fast>, <singing>content</singing>, <emphasis>content</emphasis>
 Use these tags frequently to make the narration sound expressive and human.
+
+Think step-by-step about the visual flow before outputting the final JSON. Ensure the 'mood' and 'emotion' tags perfectly match the narrative for Grok TTS integration.
 """
     prompt = grok_rules + STRICT_PROMPT.format(
         schema=ScriptJSON.model_json_schema(),

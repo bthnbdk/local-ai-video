@@ -8,7 +8,7 @@ def generate_text(prompt: str, config: dict) -> str:
     if not api_key:
         raise ValueError("XAI_API_KEY environment variable is missing. Please set it to use Grok LLM.")
         
-    model = config.get("model", "grok-2-latest")
+    model = config.get("model", "grok-4-1-fast-reasoning")
     
     url = "https://api.x.ai/v1/chat/completions"
     headers = {
@@ -35,6 +35,8 @@ def generate_text(prompt: str, config: dict) -> str:
     def attempt_gen():
         resp = requests.post(url, headers=headers, json=payload, timeout=120)
         if resp.status_code != 200:
+            if resp.status_code == 400 and ('model' in resp.text.lower() or 'not found' in resp.text.lower()):
+                 raise RuntimeError("Model ID outdated. Please check x.ai console for the latest Grok model name.")
             raise RuntimeError(f"x.ai LLM API Error: {resp.status_code} - {resp.text}")
         
         try:
