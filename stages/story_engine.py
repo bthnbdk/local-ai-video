@@ -43,9 +43,10 @@ def run(project_dir: str, config: dict, log_cb=None):
     if scenes_count < 3: scenes_count = 3
     
     tts_backend = config.get("tts", {}).get("backend", "local")
+    llm_backend = config.get("llm", {}).get("backend", "local")
     
     grok_rules = ""
-    if tts_backend == "xai":
+    if tts_backend == "xai" or llm_backend == "xai_llm":
         grok_rules = """
 SPEECH TAG GUIDE (Grok expressive TTS):
 You MUST use these tags naturally in the 'text' field to add emotion and timing:
@@ -63,6 +64,9 @@ Use these tags frequently to make the narration sound expressive and human.
         backend_type = config.get("llm", {}).get("backend", "lmstudio")
         if backend_type == "gemini":
             return gemini_gen(p, config.get("llm", {}))
+        elif backend_type == "xai_llm":
+            from backends.llm.xai_llm_backend import generate_text as xai_gen
+            return xai_gen(p, config.get("llm", {}))
         elif backend_type == "ollama":
             return ollama_gen(p, config.get("llm", {}))
         return lmstudio_gen(p, config.get("llm", {}))

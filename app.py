@@ -42,6 +42,8 @@ def create_project():
         provider = data.get("llm_provider", "local")
         if provider == "cloud":
             llm_config = {"backend": "gemini"}
+        elif provider == "xai_llm":
+            llm_config = {"backend": "xai_llm"}
         else:
             llm_config = {"backend": "lmstudio", "model": "local-model", "host": "http://localhost:1234"}
             
