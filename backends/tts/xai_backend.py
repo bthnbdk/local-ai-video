@@ -34,7 +34,7 @@ def generate_speech(text: str, config: dict, out_file: str) -> bool:
 
     voice_id = config.get("voice_id", "eve")
 
-    url = "https://api.x.ai/v1/audio/speech"
+    url = "https://api.x.ai/v1/tts"
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
@@ -43,9 +43,8 @@ def generate_speech(text: str, config: dict, out_file: str) -> bool:
     clean_text = cleanup_text(text)
 
     payload = {
-        "model": "tts-1",
-        "input": clean_text,
-        "voice": voice_id,
+        "text": clean_text,
+        "voice_id": voice_id,
         "language": "en",
         "output_format": {"codec": "wav", "sample_rate": 44100}
     }
