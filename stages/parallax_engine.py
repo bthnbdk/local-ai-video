@@ -68,14 +68,17 @@ def run(project_dir: str, config: dict, log_cb=None):
         
         if os.path.exists(fg_img):
             filter_complex = (
-                f"[0:v]format=rgb24,zoompan=z='min(zoom+0.0015,1.15)':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h}[bg];"
-                f"[1:v]format=rgba,zoompan=z='min(zoom+0.0025,1.25)':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h}[fg];"
-                f"[bg][fg]overlay=x=0:y=0:format=yuv420p[rawv]"
+                f"[0:v]scale=w='iw*(1 + 0.15*n/{frames})':h='ih*(1 + 0.15*n/{frames})':eval=frame,"
+                f"crop={w}:{h}:'(iw-ow)/2':'(ih-oh)/2'[bg];"
+                f"[1:v]scale=w='iw*(1 + 0.25*n/{frames})':h='ih*(1 + 0.25*n/{frames})':eval=frame,"
+                f"crop={w}:{h}:'(iw-ow)/2':'(ih-oh)/2'[fg];"
+                f"[bg][fg]overlay=x=0:y=0:format=rgb,format=yuv420p[rawv]"
             )
             inputs = ["-loop", "1", "-i", bg_img, "-loop", "1", "-i", fg_img]
         else:
             filter_complex = (
-                f"[0:v]format=rgb24,zoompan=z='min(zoom+0.0015,1.15)':x='iw/2-(iw/zoom)/2':y='ih/2-(ih/zoom)/2':d={frames}:s={w}x{h},format=yuv420p[rawv]"
+                f"[0:v]scale=w='iw*(1 + 0.15*n/{frames})':h='ih*(1 + 0.15*n/{frames})':eval=frame,"
+                f"crop={w}:{h}:'(iw-ow)/2':'(ih-oh)/2',format=yuv420p[rawv]"
             )
             inputs = ["-loop", "1", "-i", bg_img]
             

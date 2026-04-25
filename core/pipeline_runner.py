@@ -116,7 +116,7 @@ class PipelineRunner:
 
     def run_all(self):
         config = self.state_manager.state.get("config", {})
-        self.log("=== PROJECT SETTINGS ===")
+        self.log("=== PROJECT CONFIGURATION ===")
         self.log(json.dumps(config, indent=2))
         
         stages = [
