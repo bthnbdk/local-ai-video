@@ -19,18 +19,43 @@ def get_projects():
 @app.route("/")
 def dashboard():
     projects_data = []
+    import datetime
     for p in get_projects():
         provider = "Local"
-        sm_path = os.path.join("projects", p, "state.json")
+        status = "Unknown"
+        created_at = "Unknown Date"
+        
+        project_path = os.path.join("projects", p)
+        try:
+            stat = os.stat(project_path)
+            created_at = datetime.datetime.fromtimestamp(stat.st_ctime).strftime("%Y-%m-%d %H:%M")
+        except:
+            pass
+
+        sm_path = os.path.join(project_path, "state.json")
         if os.path.exists(sm_path):
             try:
                 with open(sm_path) as f:
                     state = json.load(f)
                     if state.get("config", {}).get("llm", {}).get("backend") == "gemini":
                         provider = "Cloud"
+                    
+                    # Logic to determine status
+                    # if there is a status field we use it, otherwise infer
+                    if state.get("status"):
+                        status = state.get("status")
+                    elif state.get("completed_stages") and "final_video" in state.get("completed_stages", []):
+                        status = "completed"
+                    elif state.get("failed_stages"):
+                        status = "failed"
+                    else:
+                        status = "in_progress"
             except:
                 pass
-        projects_data.append({"id": p, "provider": provider})
+        projects_data.append({"id": p, "provider": provider, "status": status.capitalize(), "created_at": created_at})
+    
+    # Sort projects by created date descending
+    projects_data.sort(key=lambda x: x["created_at"], reverse=True)
     return render_template("dashboard.html", projects=projects_data)
 
 @app.route("/project/new", methods=["GET", "POST"])

@@ -28,18 +28,17 @@ def run(project_dir: str, config: dict, log_cb=None):
         if os.path.exists(sf) and os.path.getsize(sf) > 0:
             valid_scenes.append(sf)
         else:
-            if log_cb: log_cb(f"CRITICAL ERROR: Scene video {sf} is missing or 0 bytes. Halting.", "error")
-            return False
+            if log_cb: log_cb(f"Warning: Scene video {sf} is missing or 0 bytes. Skipping.", "warning")
             
     scene_files = valid_scenes
     
     clips = []
     current_time = 0.0
     import random
-    for i, sf in enumerate(scene_files):
+    for sf in scene_files:
         try:
             clip = VideoClip(sf, start=current_time)
-            if i > 0:
+            if len(clips) > 0:
                 current_transition = transition
                 if current_transition == "mixed":
                     current_transition = random.choice(["hard_cut", "crossfade", "blur_dissolve"])
@@ -62,8 +61,7 @@ def run(project_dir: str, config: dict, log_cb=None):
                 current_time += clip.duration
             clips.append(clip)
         except Exception as e:
-            if log_cb: log_cb(f"Error loading {sf}: {e}", "error")
-            return False
+            if log_cb: log_cb(f"Warning: Error loading {sf}: {e}. Skipping.", "warning")
 
     final_clips = list(clips)
 

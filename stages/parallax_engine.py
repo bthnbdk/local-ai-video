@@ -170,7 +170,6 @@ def run(project_dir: str, config: dict, log_cb=None):
             for c in clips:
                 if micro_motion == "shake":
                     # We wrap the position function dynamically
-                    # MovieLite doesn't always expose .position, so we'll wrap a default
                     try:
                         orig = c.pos if hasattr(c, 'pos') else (x_offset, y_offset)
                     except:
@@ -178,8 +177,8 @@ def run(project_dir: str, config: dict, log_cb=None):
                         
                     def create_shake(start_pos):
                         return lambda t: (
-                            (start_pos(t)[0] if callable(start_pos) else start_pos[0]) + int(np.random.uniform(-2, 2)),
-                            (start_pos(t)[1] if callable(start_pos) else start_pos[1]) + int(np.random.uniform(-2, 2))
+                            int((start_pos(t)[0] if callable(start_pos) else start_pos[0]) + 1.5 * np.sin(t * np.pi)),
+                            int((start_pos(t)[1] if callable(start_pos) else start_pos[1]) + 1.5 * np.cos(t * np.pi * 0.7))
                         )
                     c.set_position(create_shake(orig))
                     
@@ -190,11 +189,11 @@ def run(project_dir: str, config: dict, log_cb=None):
                         orig_s = 1.0
                         
                     def create_pulse(start_scale):
-                        return lambda t: (start_scale(t) if callable(start_scale) else start_scale) * (1.0 + 0.02 * np.sin(np.pi * t))
+                        return lambda t: (start_scale(t) if callable(start_scale) else start_scale) * (1.0 + 0.01 * np.sin(t * 0.5))
                     c.set_scale(create_pulse(orig_s))
                     
                 elif micro_motion == "blur":
-                    c.add_effect(vfx.Blur(intensity=lambda t: 0.5 + 1.0 * np.abs(np.sin(t))))
+                    c.add_effect(vfx.Blur(intensity=lambda t: 0.2 + 0.3 * np.abs(np.sin(t))))
             
             if log_cb: log_cb(f"Rendering scene {sid} ({duration}s)")
             writer = VideoWriter(out_path, fps=fps, size=(w, h), duration=duration)
