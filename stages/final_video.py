@@ -8,6 +8,7 @@ def create_srt(alignment_file: str, srt_file: str):
         words = json.load(f)
         
     def format_ts(seconds):
+        seconds = float(seconds)
         ms = int((seconds % 1) * 1000)
         s = int(seconds)
         m = s // 60
@@ -16,17 +17,36 @@ def create_srt(alignment_file: str, srt_file: str):
         
     with open(srt_file, "w") as f:
         # Group words by 3-4 words for shorts style
-        group = []
         c = 1
-        for i, word in enumerate(words):
-            group.append(word)
-            if len(group) >= 3 or i == len(words) - 1:
-                start = format_ts(group[0]["start"])
-                end = format_ts(group[-1]["end"])
-                text = " ".join([w["word"] for w in group])
-                f.write(f"{c}\n{start} --> {end}\n{text}\n\n")
-                c += 1
+        
+        # Depending on the whisper model, output might be a dict with "segments" or a raw list of segments
+        segments = words.get("segments", []) if isinstance(words, dict) else words
+        
+        for segment in segments:
+            if not isinstance(segment, dict): continue
+            
+            segment_words = segment.get("words")
+            if isinstance(segment_words, list) and len(segment_words) > 0 and isinstance(segment_words[0], dict):
                 group = []
+                for i, w in enumerate(segment_words):
+                    group.append(w)
+                    if len(group) >= 3 or i == len(segment_words) - 1:
+                        start = format_ts(group[0].get("start", 0))
+                        end = format_ts(group[-1].get("end", 0))
+                        text = " ".join([wd.get("word", "").strip() for wd in group])
+                        f.write(f"{c}\n{start} --> {end}\n{text}\n\n")
+                        c += 1
+                        group = []
+            else:
+                # Fallback to segment-level or flat list
+                if "start" in segment and "end" in segment:
+                    start = format_ts(segment["start"])
+                    end = format_ts(segment["end"])
+                    text = segment.get("text", segment.get("word", "")).strip()
+                    if text:
+                        f.write(f"{c}\n{start} --> {end}\n{text}\n\n")
+                        c += 1
+                        
     return True
 
 def run(project_dir: str, config: dict, log_cb=None):

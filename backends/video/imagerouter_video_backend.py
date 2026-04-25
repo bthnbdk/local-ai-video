@@ -2,6 +2,7 @@ import os
 import requests
 import json
 import math
+import base64
 
 def get_closest_duration(target_duration: float) -> float:
     supported = [1.2, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -13,7 +14,8 @@ def get_closest_duration(target_duration: float) -> float:
 def generate_video(prompt: str, image_path: str, output_path: str, target_duration: float = 5.0):
     url = "https://api.imagerouter.io/v1/openai/videos/generations"
     headers = {
-        "Authorization": f"Bearer {os.environ.get('IMAGEROUTER_API_KEY')}"
+        "Authorization": f"Bearer {os.environ.get('IMAGEROUTER_API_KEY')}",
+        "Content-Type": "application/json"
     }
     
     seconds = get_closest_duration(target_duration)
@@ -25,16 +27,25 @@ def generate_video(prompt: str, image_path: str, output_path: str, target_durati
 
     try:
         with open(image_path, "rb") as image_file:
-            files = {
-                "image": image_file.read()
-            }
-            payload = {
-                "model": "bytedance/seedance-1-pro-fast",
-                "prompt": prompt,
-                "seconds": seconds
-            }
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+            
+        ext = os.path.splitext(image_path)[1].lower()
+        mime_type = "image/png"
+        if ext in [".jpeg", ".jpg"]:
+            mime_type = "image/jpeg"
+        elif ext == ".webp":
+            mime_type = "image/webp"
+            
+        data_uri = f"data:{mime_type};base64,{encoded_string}"
+        
+        payload = {
+            "model": "bytedance/seedance-1-pro-fast",
+            "prompt": prompt,
+            "seconds": seconds,
+            "frameImages": [data_uri]
+        }
 
-            response = requests.post(url, headers=headers, data=payload, files=files, timeout=600)
+        response = requests.post(url, headers=headers, json=payload, timeout=600)
 
         if response.status_code == 200:
             data = response.json()
