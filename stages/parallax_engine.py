@@ -1,8 +1,23 @@
 import os
 import json
 import subprocess
+import numpy as np
+from PIL import Image
+
+def get_centroid(image_path):
+    img = Image.open(image_path).convert("RGBA")
+    arr = np.array(img)
+    alpha = arr[:, :, 3]
+    y_coords, x_coords = np.where(alpha > 0)
+    if len(x_coords) == 0:
+        return img.width // 2, img.height // 2
+    
+    min_x, max_x = np.min(x_coords), np.max(x_coords)
+    min_y, max_y = np.min(y_coords), np.max(y_coords)
+    return (min_x + max_x) // 2, (min_y + max_y) // 2
 
 def run(project_dir: str, config: dict, log_cb=None):
+    from movielite import ImageClip, VideoWriter, vfx
     up_dir = os.path.join(project_dir, "upscaled")
     mask_dir = os.path.join(project_dir, "masks")
     scenes_dir = os.path.join(project_dir, "scenes")
@@ -32,7 +47,7 @@ def run(project_dir: str, config: dict, log_cb=None):
         
     motion_engine = config.get("pipeline", {}).get("motion_source", "local")
     
-    if log_cb: log_cb(f"Generating video scenes ({w}x{h}) using {motion_engine} engine...")
+    if log_cb: log_cb(f"Generating video scenes ({w}x{h}) using {motion_engine} engine (movielite)...")
     
     fps = config.get("pipeline", {}).get("fps", 30)
     transition = config.get("pipeline", {}).get("transition", "crossfade")
@@ -56,7 +71,6 @@ def run(project_dir: str, config: dict, log_cb=None):
                 raw_out = out_path + ".raw.mp4"
                 generate_video(prompt, bg_img, raw_out, duration)
                 
-                # Trim to exact duration
                 subprocess.run(["ffmpeg", "-y", "-i", raw_out, "-t", str(duration), "-c", "copy", out_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 if os.path.exists(raw_out):
                     os.remove(raw_out)
@@ -64,47 +78,41 @@ def run(project_dir: str, config: dict, log_cb=None):
             except Exception as e:
                 if log_cb: log_cb(f"Warning: Cloud video generation failed for {sid}: {e}. Falling back to 2.5D parallax.")
 
-        frames = int(duration * fps)
-        
-        if os.path.exists(fg_img):
-            filter_complex = (
-                f"[0:v]scale=w='iw*(1 + 0.15*n/{frames})':h='ih*(1 + 0.15*n/{frames})':eval=frame,"
-                f"crop={w}:{h}:'(iw-ow)/2':'(ih-oh)/2'[bg];"
-                f"[1:v]scale=w='iw*(1 + 0.25*n/{frames})':h='ih*(1 + 0.25*n/{frames})':eval=frame,"
-                f"crop={w}:{h}:'(iw-ow)/2':'(ih-oh)/2'[fg];"
-                f"[bg][fg]overlay=x=0:y=0:format=rgb,format=yuv420p[rawv]"
-            )
-            inputs = ["-loop", "1", "-i", bg_img, "-loop", "1", "-i", fg_img]
-        else:
-            filter_complex = (
-                f"[0:v]scale=w='iw*(1 + 0.15*n/{frames})':h='ih*(1 + 0.15*n/{frames})':eval=frame,"
-                f"crop={w}:{h}:'(iw-ow)/2':'(ih-oh)/2',format=yuv420p[rawv]"
-            )
-            inputs = ["-loop", "1", "-i", bg_img]
-            
-        fade_filter = ""
-        if transition == "crossfade" and duration > 1.0:
-            fade_filter = f";[rawv]fade=t=in:st=0:d=0.3,fade=t=out:st={max(0, duration-0.5)}:d=0.5[v]"
-        elif transition == "dip_to_black" and duration > 1.0:
-            fade_filter = f";[rawv]fade=t=out:st={max(0, duration-0.5)}:d=0.5[v]"
-        else:
-            fade_filter = f";[rawv]copy[v]"
-            
-        filter_complex += fade_filter
-            
-        cmd = [
-            "ffmpeg", "-y", *inputs,
-            "-filter_complex", filter_complex,
-            "-map", "[v]",
-            "-t", str(duration), "-r", str(fps), "-c:v", "libx264", "-pix_fmt", "yuv420p", out_path
-        ]
-        
-        if log_cb: log_cb(f"Rendering scene {sid} ({duration}s)")
-        
         try:
-            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            bg_clip = ImageClip(bg_img, duration=duration)
+            base_w, base_h = bg_clip.size
+            
+            # blur bg slightly to separate it from fg
+            bg_clip.add_effect(vfx.Blur(intensity=2.0))
+            
+            clips = [bg_clip]
+            
+            if os.path.exists(fg_img):
+                cx, cy = get_centroid(fg_img)
+            else:
+                cx, cy = base_w // 2, base_h // 2
+                
+            def create_scale(max_zoom):
+                return lambda t: 1.0 + max_zoom * (t / duration)
+                
+            def create_pos(max_zoom):
+                return lambda t: (int(cx - cx * (1.0 + max_zoom * (t / duration))), int(cy - cy * (1.0 + max_zoom * (t / duration))))
+
+            bg_clip.set_scale(create_scale(0.15))
+            bg_clip.set_position(create_pos(0.15))
+            
+            if os.path.exists(fg_img):
+                fg_clip = ImageClip(fg_img, duration=duration)
+                fg_clip.set_scale(create_scale(0.25))
+                fg_clip.set_position(create_pos(0.25))
+                clips.append(fg_clip)
+            
+            if log_cb: log_cb(f"Rendering scene {sid} ({duration}s)")
+            writer = VideoWriter(out_path, fps=fps, size=(w, h), duration=duration)
+            writer.add_clips(clips)
+            writer.write()
         except Exception as e:
-            if log_cb: log_cb(f"Warning: ffmpeg failed for scene {sid}: {e}")
+            if log_cb: log_cb(f"Warning: movielite failed for scene {sid}: {e}")
             with open(out_path, "w") as empty: empty.write("")
             
     return True

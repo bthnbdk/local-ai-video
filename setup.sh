@@ -47,7 +47,7 @@ pip install mflux
 pip install whisper-timestamped
 
 # 10. Utilities
-pip install rembg basicsr realesrgan timm diffusers transformers accelerate google-generativeai python-dotenv google-auth websockets setuptools
+pip install rembg basicsr realesrgan timm diffusers transformers accelerate google-generativeai python-dotenv google-auth websockets setuptools movielite pictex
 
 echo ""
 echo "=== Setup complete ==="

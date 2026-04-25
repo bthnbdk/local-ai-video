@@ -20,6 +20,8 @@ google-generativeai>=0.8.0
 google-auth
 websockets
 python-dotenv
+movielite
+pictex
 
 # Optional/Platform specific (handled by setup.sh or user)
 # kokoro-onnx
