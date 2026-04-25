@@ -117,7 +117,7 @@ def run(project_dir: str, config: dict, log_cb=None):
                         t_clip = TextClip(text, start=start, duration=duration, canvas=canvas)
                         
                         def create_pos_func(tw, th):
-                            return lambda t, mw=clips[0].size[0], mh=clips[0].size[1]: (mw // 2 - tw // 2, int(mh * 0.85 - th//2))
+                            return lambda t, mw=clips[0].size[0], mh=clips[0].size[1]: (mw // 2 - tw // 2, mh - 150 - th // 2)
                             
                         t_clip.set_position(create_pos_func(t_clip.size[0], t_clip.size[1]))
                         final_clips.append(t_clip)
@@ -130,7 +130,7 @@ def run(project_dir: str, config: dict, log_cb=None):
     if len(clips) > 0:
         base_size = clips[0].size
         try:
-            writer = VideoWriter(out_path, fps=fps, size=base_size, duration=total_duration)
+            writer = VideoWriter(out_path, fps=fps, size=base_size, duration=total_duration, processes=4)
             writer.add_clips(final_clips)
             writer.write()
         except Exception as e:

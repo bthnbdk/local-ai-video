@@ -95,16 +95,16 @@ def run(project_dir: str, config: dict, log_cb=None):
             def create_scale(max_zoom):
                 return lambda t: 1.0 + max_zoom * (t / duration)
                 
-            def create_pos(max_zoom):
-                return lambda t: (int(cx - cx * (1.0 + max_zoom * (t / duration))), int(cy - cy * (1.0 + max_zoom * (t / duration))))
+            def create_pos(max_zoom, _cx, _cy):
+                return lambda t, cx=_cx, cy=_cy: (int(cx - cx * (1.0 + max_zoom * (t / duration))), int(cy - cy * (1.0 + max_zoom * (t / duration))))
 
-            bg_clip.set_scale(create_scale(0.15))
-            bg_clip.set_position(create_pos(0.15))
+            bg_clip.set_scale(create_scale(0.10))
+            bg_clip.set_position(create_pos(0.10, cx, cy))
             
             if os.path.exists(fg_img):
                 fg_clip = ImageClip(fg_img, duration=duration)
-                fg_clip.set_scale(create_scale(0.25))
-                fg_clip.set_position(create_pos(0.25))
+                fg_clip.set_scale(create_scale(0.20))
+                fg_clip.set_position(create_pos(0.20, cx, cy))
                 clips.append(fg_clip)
             
             if log_cb: log_cb(f"Rendering scene {sid} ({duration}s)")
