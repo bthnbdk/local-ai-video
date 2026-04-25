@@ -130,9 +130,9 @@ def run(project_dir: str, config: dict, log_cb=None):
     if len(clips) > 0:
         base_size = clips[0].size
         try:
-            writer = VideoWriter(out_path, fps=fps, size=base_size, duration=total_duration, processes=4)
+            writer = VideoWriter(out_path, fps=fps, size=base_size, duration=total_duration)
             writer.add_clips(final_clips)
-            writer.write()
+            writer.write(processes=4)
         except Exception as e:
             if log_cb: log_cb(f"Movielite rendering failed: {e}", "error")
             return False
