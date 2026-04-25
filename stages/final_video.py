@@ -35,15 +35,29 @@ def run(project_dir: str, config: dict, log_cb=None):
     
     clips = []
     current_time = 0.0
+    import random
     for i, sf in enumerate(scene_files):
         try:
             clip = VideoClip(sf, start=current_time)
-            if transition == "crossfade" and i > 0:
-                overlap = min(0.5, clip.duration / 2)
-                clip.set_start(current_time - overlap)
-                prev_clip = clips[-1]
-                prev_clip.add_transition(clip, vtx.CrossFade(duration=overlap))
-                current_time += (clip.duration - overlap)
+            if i > 0:
+                current_transition = transition
+                if current_transition == "mixed":
+                    current_transition = random.choice(["hard_cut", "crossfade", "blur_dissolve"])
+                    
+                if current_transition == "crossfade":
+                    overlap = min(0.5, clip.duration / 2)
+                    clip.set_start(current_time - overlap)
+                    prev_clip = clips[-1]
+                    prev_clip.add_transition(clip, vtx.CrossFade(duration=overlap))
+                    current_time += (clip.duration - overlap)
+                elif current_transition == "blur_dissolve":
+                    overlap = min(0.5, clip.duration / 2)
+                    clip.set_start(current_time - overlap)
+                    prev_clip = clips[-1]
+                    prev_clip.add_transition(clip, vtx.BlurDissolve(duration=overlap, max_blur=15.0))
+                    current_time += (clip.duration - overlap)
+                else: # hard_cut
+                    current_time += clip.duration
             else:
                 current_time += clip.duration
             clips.append(clip)

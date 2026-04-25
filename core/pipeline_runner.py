@@ -121,9 +121,16 @@ class PipelineRunner:
         
         stages = [
             "story", "tts", "tts_scoring", "whisper", "scene_timing", "style", "image_prompts",
-            "image_gen", "image_scoring", "upscale", "segmentation", "depth", "parallax",
+            "image_gen", "image_scoring", "upscale", "parallax",
             "overlay", "audio_post", "music", "final_video"
         ]
+        
+        motion_source = config.get("pipeline", {}).get("motion_source", "local")
+        if motion_source != "plain_2d":
+            # Insert segmentation and depth before parallax
+            idx = stages.index("parallax")
+            stages.insert(idx, "segmentation")
+            stages.insert(idx + 1, "depth")
         
         for stage in stages:
             if not self.run_stage(stage):

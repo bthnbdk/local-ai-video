@@ -39,7 +39,27 @@ Corrected JSON:"""
 
 def run(project_dir: str, config: dict, log_cb=None):
     topic = config.get("topic", "Default topic")
-    scenes_count = max(3, min(12, len(topic.split()) // 5))
+    
+    story_profile = config.get("pipeline", {}).get("story_profile", "youtube")
+    content_type = config.get("pipeline", {}).get("content_type", "short")
+    target_duration = int(config.get("pipeline", {}).get("target_duration", 60))
+    pacing = config.get("pipeline", {}).get("pacing", "fast")
+    
+    # Calculate average scene duration based on pacing and profile
+    if pacing == "fast":
+        avg_scene_duration_sec = 3.0
+    elif pacing == "relaxed":
+        avg_scene_duration_sec = 8.0
+    else:
+        avg_scene_duration_sec = 5.0
+        
+    # TikTok vs YouTube modifiers
+    if story_profile == "tiktok":
+        avg_scene_duration_sec *= 0.8
+    elif story_profile == "youtube":
+        avg_scene_duration_sec *= 1.2
+        
+    scenes_count = int(target_duration / avg_scene_duration_sec)
     if scenes_count < 3: scenes_count = 3
     
     tts_backend = config.get("tts", {}).get("backend", "local")

@@ -126,6 +126,8 @@ def create_project():
                 "target_duration": int(data.get("target_duration", 60)),
                 "pacing": data.get("pacing", "fast"),
                 "motion_source": data.get("motion_source", "local"),
+                "2d_effect_style": data.get("2d_effect_style", "mixed"),
+                "micro_motion": data.get("micro_motion", "none"),
                 "music_genre": data.get("music_genre", ""),
                 "music_mode": "local" if data.get("music_file", "").strip() else "generated",
                 "music_file": data.get("music_file", "").strip(),

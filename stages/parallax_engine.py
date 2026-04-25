@@ -82,30 +82,119 @@ def run(project_dir: str, config: dict, log_cb=None):
             bg_clip = ImageClip(bg_img, duration=duration)
             base_w, base_h = bg_clip.size
             
-            # blur bg slightly to separate it from fg
-            bg_clip.add_effect(vfx.Blur(intensity=2.0))
-            
-            clips = [bg_clip]
-            
-            if os.path.exists(fg_img):
-                cx, cy = get_centroid(fg_img)
+            # Smart Fit / Crop to target Aspect Ratio
+            target_ar = w / h
+            img_ar = base_w / base_h
+            if img_ar > target_ar + 0.01:
+                # Image is wider -> match height, crop width
+                scale_factor = h / base_h
+            elif img_ar < target_ar - 0.01:
+                # Image is taller -> match width, crop height
+                scale_factor = w / base_w
             else:
-                cx, cy = base_w // 2, base_h // 2
+                scale_factor = w / base_w
                 
-            def create_scale(max_zoom):
-                return lambda t: 1.0 + max_zoom * (t / duration)
-                
-            def create_pos(max_zoom, _cx, _cy):
-                return lambda t, cx=_cx, cy=_cy: (int(cx - cx * (1.0 + max_zoom * (t / duration))), int(cy - cy * (1.0 + max_zoom * (t / duration))))
-
-            bg_clip.set_scale(create_scale(0.10))
-            bg_clip.set_position(create_pos(0.10, cx, cy))
+            fit_w = int(base_w * scale_factor)
+            fit_h = int(base_h * scale_factor)
             
-            if os.path.exists(fg_img):
-                fg_clip = ImageClip(fg_img, duration=duration)
-                fg_clip.set_scale(create_scale(0.20))
-                fg_clip.set_position(create_pos(0.20, cx, cy))
-                clips.append(fg_clip)
+            x_offset = (w - fit_w) // 2
+            y_offset = (h - fit_h) // 2
+            
+            bg_clip.set_size(width=fit_w, height=fit_h)
+            
+            import random
+            is_2d = False
+            if motion_engine == "plain_2d":
+                is_2d = True
+            elif motion_engine == "mixed":
+                is_2d = random.choice([True, False])
+                
+            if is_2d:
+                effect_style = config.get("pipeline", {}).get("2d_effect_style", "mixed")
+                if effect_style == "mixed":
+                    effect_style = random.choice(["zoom_in", "zoom_out", "pan_left", "pan_right"])
+                
+                # Apply base centering first
+                bg_clip.set_position((x_offset, y_offset))
+
+                if effect_style == "zoom_in":
+                    bg_clip.add_effect(vfx.ZoomIn(duration=duration, from_scale=1.0, to_scale=1.1))
+                elif effect_style == "zoom_out":
+                    bg_clip.add_effect(vfx.ZoomOut(duration=duration, from_scale=1.1, to_scale=1.0))
+                elif effect_style == "pan_left":
+                    # For pan left, we move the image from right to left or focus position
+                    bg_clip.add_effect(vfx.KenBurns(start_scale=1.1, end_scale=1.1, start_position=(0, 0), end_position=(int(fit_w*0.05), 0)))
+                elif effect_style == "pan_right":
+                    bg_clip.add_effect(vfx.KenBurns(start_scale=1.1, end_scale=1.1, start_position=(int(fit_w*0.05), 0), end_position=(0, 0)))
+                
+                clips = [bg_clip]
+                
+            else:
+                # blur bg slightly to separate it from fg
+                bg_clip.add_effect(vfx.Blur(intensity=2.0))
+                
+                clips = [bg_clip]
+                
+                if os.path.exists(fg_img):
+                    cx_orig, cy_orig = get_centroid(fg_img)
+                    cx = int(cx_orig * scale_factor) + x_offset
+                    cy = int(cy_orig * scale_factor) + y_offset
+                else:
+                    cx, cy = w // 2, h // 2
+                    
+                def create_scale(max_zoom):
+                    return lambda t: 1.0 + max_zoom * (t / duration)
+                    
+                def create_pos(max_zoom, _cx, _cy, _xoff, _yoff):
+                    # Based on cx, cy anchor and base offsets
+                    return lambda t, _c=_cx, _cy2=_cy, zoom=max_zoom: (
+                        int(_xoff - (_c - _xoff) * (zoom * (t / duration))),
+                        int(_yoff - (_cy2 - _yoff) * (zoom * (t / duration)))
+                    )
+
+                bg_clip.set_scale(create_scale(0.10))
+                bg_clip.set_position(create_pos(0.10, cx, cy, x_offset, y_offset))
+                
+                if os.path.exists(fg_img):
+                    fg_clip = ImageClip(fg_img, duration=duration)
+                    fg_clip.set_size(width=fit_w, height=fit_h)
+                    fg_clip.set_scale(create_scale(0.20))
+                    fg_clip.set_position(create_pos(0.20, cx, cy, x_offset, y_offset))
+                    clips.append(fg_clip)
+                    
+            # Apply Micro Motions
+            micro_motion = config.get("pipeline", {}).get("micro_motion", "none")
+            if micro_motion == "mixed":
+                micro_motion = random.choice(["shake", "pulse", "blur", "none"])
+                
+            for c in clips:
+                if micro_motion == "shake":
+                    # We wrap the position function dynamically
+                    # MovieLite doesn't always expose .position, so we'll wrap a default
+                    try:
+                        orig = c.pos if hasattr(c, 'pos') else (x_offset, y_offset)
+                    except:
+                        orig = (x_offset, y_offset)
+                        
+                    def create_shake(start_pos):
+                        return lambda t: (
+                            (start_pos(t)[0] if callable(start_pos) else start_pos[0]) + int(np.random.uniform(-2, 2)),
+                            (start_pos(t)[1] if callable(start_pos) else start_pos[1]) + int(np.random.uniform(-2, 2))
+                        )
+                    c.set_position(create_shake(orig))
+                    
+                elif micro_motion == "pulse":
+                    try:
+                        orig_s = c.scale if hasattr(c, 'scale') else 1.0
+                    except:
+                        orig_s = 1.0
+                        
+                    def create_pulse(start_scale):
+                        return lambda t: (start_scale(t) if callable(start_scale) else start_scale) * (1.0 + 0.02 * np.sin(np.pi * t))
+                    c.set_scale(create_pulse(orig_s))
+                    
+                elif micro_motion == "blur":
+                    c.add_effect(vfx.Blur(intensity=lambda t: 0.5 + 1.0 * np.abs(np.sin(t))))
             
             if log_cb: log_cb(f"Rendering scene {sid} ({duration}s)")
             writer = VideoWriter(out_path, fps=fps, size=(w, h), duration=duration)

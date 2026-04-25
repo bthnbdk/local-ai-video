@@ -228,13 +228,49 @@
                         </div>
                     </div>
                     
-                    <!-- Motion Engine -->
+                    <!-- Video Engine -->
                     <div>
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Motion Engine</label>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Video Engine</label>
                         <div class="relative">
                             <select id="motion_source" name="motion_source" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-orange-500 hover:border-zinc-700 transition-colors">
-                                <option value="local" data-price="0.0">Smooth 2.5D Parallax (Local)</option>
-                                <option value="cloud" data-price="0.07">AI Video Generation (Cloud - Seedance-1)</option>
+                                <option value="plain_2d" data-price="0.0">Plain 2D (Smooth Pan/Zoom)</option>
+                                <option value="local" data-price="0.0">2.5D Parallax (Depth Effect)</option>
+                                <option value="mixed" data-price="0.0">Mixed (AI Decides 2D/2.5D)</option>
+                                <option value="cloud" data-price="0.07">Cloud AI Video (Seedance)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Micro-Motion -->
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Micro-Motion Effect</label>
+                        <div class="relative">
+                            <select name="micro_motion" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-orange-500 hover:border-zinc-700 transition-colors">
+                                <option value="none" data-price="0.0">None (Standard Motion)</option>
+                                <option value="mixed" data-price="0.0">Mixed (AI Decides)</option>
+                                <option value="shake" data-price="0.0">Subtle Camera Shake</option>
+                                <option value="pulse" data-price="0.0">Breathing Zoom (Pulse)</option>
+                                <option value="blur" data-price="0.0">Animated Focus Blur</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 2D Effect Style -->
+                    <div id="2d_effect_style_container">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-3">2D Effect Style</label>
+                        <div class="relative">
+                            <select id="2d_effect_style" name="2d_effect_style" class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-3 px-4 text-white appearance-none focus:outline-none focus:border-orange-500 hover:border-zinc-700 transition-colors">
+                                <option value="zoom_in">Zoom In</option>
+                                <option value="zoom_out">Zoom Out</option>
+                                <option value="pan_left">Pan Left</option>
+                                <option value="pan_right">Pan Right</option>
+                                <option value="mixed">Mixed (AI Decides)</option>
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-500">
                                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
@@ -289,9 +325,10 @@
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-500 mb-2">Transition Style</label>
                                     <select name="transition" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl py-2 px-3 text-white appearance-none focus:outline-none focus:border-blue-500 text-sm">
-                                        <option value="crossfade">Crossfade (Smooth)</option>
                                         <option value="hard_cut">Hard Cut</option>
-                                        <option value="dip_to_black">Dip to Black</option>
+                                        <option value="crossfade">Crossfade</option>
+                                        <option value="blur_dissolve">Blur Dissolve</option>
+                                        <option value="mixed">Mixed (AI Decides)</option>
                                     </select>
                                 </div>
                             </div>
@@ -397,6 +434,17 @@ const dUpscaleModel = document.getElementById('cloud_upscale_model_container');
 const upscaleModel = document.getElementById('upscale_model');
 
 const motionSource = document.getElementById('motion_source');
+const d2dEffectStyle = document.getElementById('2d_effect_style_container');
+
+function updateMotionDependencies() {
+    if (motionSource.value === 'plain_2d') {
+        d2dEffectStyle.classList.remove('hidden');
+    } else {
+        d2dEffectStyle.classList.add('hidden');
+    }
+}
+motionSource.addEventListener('change', updateMotionDependencies);
+updateMotionDependencies();
 
 const topicArea = document.querySelector('textarea[name="topic"]');
 const costEstimator = document.getElementById('cost_estimator');
