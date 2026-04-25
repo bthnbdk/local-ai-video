@@ -68,6 +68,16 @@ def run(project_dir: str, config: dict, log_cb=None):
         
     scene_files = sorted([os.path.join(scenes_dir, f) for f in os.listdir(scenes_dir) if f.endswith(".mp4")])
     if not scene_files: return False
+    
+    valid_scenes = []
+    for sf in scene_files:
+        if os.path.exists(sf) and os.path.getsize(sf) > 0:
+            valid_scenes.append(sf)
+        else:
+            if log_cb: log_cb(f"CRITICAL ERROR: Scene video {sf} is missing or 0 bytes. Halting.", "error")
+            return False
+            
+    scene_files = valid_scenes
 
     # 2. Extract final audio if exists
     audio_path = os.path.join(project_dir, "mixed_audio.wav")

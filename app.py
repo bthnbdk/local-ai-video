@@ -264,6 +264,14 @@ def delete_project(project_id):
         shutil.rmtree(path)
     return jsonify({"success": True, "redirect": "/"})
 
+@app.route("/project/<project_id>/resume", methods=["POST"])
+def resume_project(project_id):
+    def run_pipe():
+        runner = PipelineRunner(project_id, event_callback=lambda event: broadcast(project_id, event))
+        runner.run_all()
+    threading.Thread(target=run_pipe).start()
+    return jsonify({"success": True, "redirect": f"/project/{project_id}/progress"})
+
 @app.route("/project/<project_id>/progress")
 def progress(project_id):
     sm = StateManager(project_id)

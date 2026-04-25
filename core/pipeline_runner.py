@@ -115,6 +115,10 @@ class PipelineRunner:
             return False
 
     def run_all(self):
+        config = self.state_manager.state.get("config", {})
+        self.log("=== PROJECT SETTINGS ===")
+        self.log(json.dumps(config, indent=2))
+        
         stages = [
             "story", "tts", "tts_scoring", "whisper", "scene_timing", "style", "image_prompts",
             "image_gen", "image_scoring", "upscale", "segmentation", "depth", "parallax",

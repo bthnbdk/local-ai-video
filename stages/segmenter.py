@@ -18,11 +18,24 @@ def run(project_dir: str, config: dict, log_cb=None):
                 remove_bg_cloud(in_path, out_path, config, log_cb)
         return True
     
-    if log_cb: log_cb("Segmenting images (simulated rembg)...")
+    if log_cb: log_cb("Segmenting images using rembg (local)...")
+    
+    from rembg import remove
     
     for f in os.listdir(up_dir):
         if f.endswith(".png"):
-            # Dummy logic: copy original as mask for simplicity since we don't execute
-            shutil.copy(os.path.join(up_dir, f), os.path.join(mask_dir, f))
+            in_path = os.path.join(up_dir, f)
+            out_path = os.path.join(mask_dir, f)
+            try:
+                with open(in_path, 'rb') as i:
+                    input_data = i.read()
+                    
+                output_data = remove(input_data)
+                
+                with open(out_path, 'wb') as o:
+                    o.write(output_data)
+            except Exception as e:
+                if log_cb: log_cb(f"Failed to segment {f}: {e}")
+                shutil.copy(in_path, out_path)
             
     return True

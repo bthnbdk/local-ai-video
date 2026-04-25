@@ -25,11 +25,26 @@ def run(project_dir: str, config: dict, log_cb=None):
                 upscale_cloud(in_path, out_path, config, log_cb)
         return True
         
-    if log_cb: log_cb("Upscaling images (simulated RealESRGAN)...")
-    # Simulate Real-ESRGAN in a real environment
+    if log_cb: log_cb("Upscaling images (Local PIL Lanczos)...")
+    from PIL import Image
     for f in os.listdir(img_dir):
         if f.endswith(".png"):
-            # Dummy copy
-            shutil.copy(os.path.join(img_dir, f), os.path.join(up_dir, f))
+            in_path = os.path.join(img_dir, f)
+            out_path = os.path.join(up_dir, f)
+            try:
+                img = Image.open(in_path)
+                # target width around 1024 or 2x
+                new_width = img.width * 2
+                new_height = img.height * 2
+                if new_height > 2048:
+                    ratio = 2048 / img.height
+                    new_height = int(img.height * ratio)
+                    new_width = int(img.width * ratio)
+                
+                img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                img.save(out_path)
+            except Exception as e:
+                if log_cb: log_cb(f"Failed to upscale {f}: {e}")
+                shutil.copy(in_path, out_path)
             
     return True
